@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XuxuGlow - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+</head>
+<body class="body-login">
+
+    <div class="login-page-container">
+        <div class="login-card-wrapper">
+            
+            <div class="login-graphic-column">
+                </div>
+
+            <div class="login-form-column">
+                <div class="login-container"> 
+                    <div class="login-form-wrapper">
+                        <h3>Entrar na Plataforma</h3>
+                        <form id="form-login" novalidate>
+                            <div id="login-error-message" class="status-mensagem erro" style="display:none; margin-bottom: 15px;" role="alert" aria-live="assertive"></div>
+                            
+                            <div class="form-grupo">
+                                <label for="email">Email ou Utilizador</label>
+                                <input type="email" id="email" name="email" placeholder="ex: seuemail@dominio.com" required aria-describedby="email-error">
+                                <small id="email-error" class="form-error-message" style="display:none;"></small>
+                            </div>
+                            <div class="form-grupo">
+                                <label for="senha">Senha</label>
+                                <input type="password" id="senha" name="senha" placeholder="Digite sua senha segura" required aria-describedby="senha-error">
+                                <small id="senha-error" class="form-error-message" style="display:none;"></small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-login">
+                                <span class="btn-text">Entrar</span>
+                                <span class="btn-spinner" style="display: none;"></span>
+                            </button>
+                            
+                            </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... (código de animação para login-graphic-column) ...
+
+            const loginForm = document.getElementById('form-login');
+            if (loginForm) {
+                // ... (lógica para spinner do botão de login) ...
+                loginForm.addEventListener('submit', function(e) {
+                    // Para testar o spinner, descomente a linha abaixo:
+                    // e.preventDefault(); 
+                    
+                    // ... (código do spinner) ...
+                });
+            }
+        });
+    </script>
+    <script src="js/dist/script.js" defer></script> 
+</body>
+</html>
