@@ -3,10 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XuxuGlow - Gerenciamento de Produtos</title>
-    <link rel="stylesheet" href="css/vendas.css"> {/* Ou o seu CSS principal, ex: style.css */}
-    <link rel="stylesheet" href="css/produtos.css"> {/* Crie este arquivo se precisar de estilos específicos para produtos */}
+    <title>XuxuGlow - Dashboard de Vendas</title>
+    <link rel="stylesheet" href="css/vendas.css"> 
+    <link rel="stylesheet" href="css/produtos.css"> 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+    
+    <style>
+        /* Estilos Gerais para o Layout do Dashboard */
+        .dashboard-page-content .dashboard-section {
+            padding: 1rem; /* Adiciona um pouco de espaçamento interno */
+        }
+
+        .kpi-cards-container {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os cards quebrem para a próxima linha */
+            gap: 1rem;       /* Espaçamento entre os cards de KPI */
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-card {
+            flex: 1; /* Faz com que os cards tentem ocupar o espaço disponível igualmente */
+            min-width: 200px; /* Largura mínima para cada card de KPI */
+            background: var(--cor-fundo-cards-dark, #ffffff); /* Cor de fundo do card */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra suave */
+        }
+        .kpi-card h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--cor-texto-secundario-dark, #555);
+        }
+        .kpi-card p {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin: 0;
+            color: var(--cor-texto-principal-dark, #111);
+        }
+
+        .graficos-container {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os gráficos quebrem */
+            gap: 1rem;       /* Espaçamento entre os cards de gráfico */
+            margin-bottom: 1.5rem;
+        }
+
+        .grafico-card {
+            flex: 1; /* Tenta ocupar o espaço, bom para 2 gráficos lado a lado */
+            min-width: 280px; /* Largura mínima, ajusta se necessário */
+            max-width: calc(50% - 0.5rem); /* Para 2 colunas, considerando o gap. Ajuste se quiser mais ou menos colunas. */
+            background: var(--cor-fundo-cards-dark, #ffffff);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-height: 300px; /* Altura mínima para o gráfico caber bem */
+            display: flex; /* Para alinhar o título e o canvas */
+            flex-direction: column; /* Título acima, canvas abaixo */
+        }
+        .grafico-card h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .grafico-card canvas {
+            max-width: 100%; /* Garante que o canvas não estoure o card */
+            flex-grow: 1; /* Faz o canvas ocupar o espaço restante no card */
+        }
+
+        .card-secao.secao-tabela-detalhada {
+            background: var(--cor-fundo-cards-dark, #ffffff);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        .card-secao.secao-tabela-detalhada h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        .tabela-responsiva-container {
+            overflow-x: auto; /* Permite scroll horizontal na tabela se ela for muito larga */
+        }
+        .tabela-responsiva-container table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .tabela-responsiva-container th,
+        .tabela-responsiva-container td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--cor-bordas-dark, #eee);
+        }
+        .tabela-responsiva-container thead th {
+            background-color: var(--cor-fundo-accent-dark, #f8f9fa);
+            font-weight: 600;
+            position: sticky; /* Para cabeçalho fixo no scroll vertical, se o container tiver altura definida e overflow-y */
+            top: 0;
+        }
+        .coluna-numero {
+            text-align: right !important;
+        }
+        .coluna-monetaria::before {
+            content: "R$ "; /* Adiciona R$ antes de valores monetários se você removeu do JS */
+            /* Se o formatarMoedaVendas já inclui R$, você pode remover esta linha */
+        }
+
+        /* Mensagens de status */
+        #loading-message, #error-message, #no-data-message {
+            padding: 20px;
+            text-align: center;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        #loading-message { background-color: #eef; border: 1px solid #ccf; }
+        #error-message { background-color: #fee; border: 1px solid #fcc; color: #a00; }
+        #no-data-message { background-color: #eff; border: 1px solid #cff; }
+
+    </style>
     </head>
 <body>
     <div class="dashboard-layout">
@@ -19,31 +134,27 @@
             <nav>
                 <ul class="sidebar-nav">
                     <li>
-                        <a href="vendas.html#dashboard" data-target="secao-dashboard">
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path></svg>
-                            </span> Dashboard
+                        <a href="#dashboard" data-target="secao-dashboard" data-title="Visão Geral das Vendas" class="active"> 
+                            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path></svg></span> 
+                            Dashboard
                         </a>
                     </li>
                     <li>
-                        <a href="produtos.html" class="active">
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                            </span> Produtos
+                        <a href="produtos.html" data-title="Gerenciamento de Produtos">
+                            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></span> 
+                            Produtos
                         </a>
                     </li>
                     <li>
-                        <a href="vendas.html#clientes" data-target="secao-clientes">
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            </span> Clientes
+                        <a href="#clientes" data-target="secao-clientes" data-title="Clientes">
+                             <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> 
+                             Clientes
                         </a>
                     </li>
                     <li>
-                        <a href="vendas.html#configuracoes" data-target="secao-configuracoes">
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                            </span> Configurações
+                        <a href="#configuracoes" data-target="secao-configuracoes" data-title="Configurações">
+                             <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> 
+                             Configurações
                         </a>
                     </li>
                 </ul>
@@ -53,8 +164,8 @@
         <div class="dashboard-main-content">
             <header class="dashboard-header-main">
                 <div class="header-left">
-                    <button class="menu-toggle-btn" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebarNav">☰</button>
-                    <h2 id="dashboard-titulo-secao">Gerenciamento de Produtos</h2>
+                    <button class="menu-toggle-btn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+                    <h2 id="dashboard-titulo-secao">Visão Geral das Vendas</h2>
                 </div>
                 <div class="header-right">
                     <input type="search" placeholder="Buscar..." class="dashboard-search" aria-label="Buscar no dashboard"/>
@@ -62,109 +173,65 @@
                 </div>
             </header>
 
-            <main class="dashboard-page-content" id="secao-produtos-principal">
-                <div class="filtros-produtos-toolbar">
-                    <input type="text" id="filtro-busca-produto" class="form-input-filtro" placeholder="Buscar por nome ou ID...">
-                    
-                    <select id="filtro-categoria-produto" class="form-select-filtro">
-                        <option value="">Todas as Categorias</option>
-                        <option value="Vestidos">Vestidos</option>
-                        <option value="Calças">Calças</option>
-                        <option value="Blusas">Blusas</option>
-                        <option value="Saias">Saias</option>
-                        <option value="Acessorios">Acessórios</option>
-                        <option value="Calcados">Calçados</option>
-                        <option value="Casacos">Casacos</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                    
-                    <select id="filtro-estoque-produto" class="form-select-filtro">
-                        <option value="">Todo o Estoque</option>
-                        <option value="em-estoque">Em Estoque (10+)</option>
-                        <option value="baixo-estoque">Baixo Estoque (1-9)</option>
-                        <option value="esgotado">Esgotado (0)</option>
-                    </select>
+            <div class="dashboard-page-content">
+                <div id="secao-dashboard" class="dashboard-section" style="display: block;"> 
+                    <div class="kpi-cards-container">
+                        <div class="kpi-card">
+                            <h4>Total de Vendas</h4>
+                            <p id="kpi-total-vendas">R$ 0,00</p>
+                        </div>
+                        <div class="kpi-card">
+                            <h4>Nº de Transações</h4>
+                            <p id="kpi-num-transacoes">0</p>
+                        </div>
+                        <div class="kpi-card">
+                            <h4>Ticket Médio</h4>
+                            <p id="kpi-ticket-medio">R$ 0,00</p>
+                        </div>
+                    </div>
 
-                    <select id="ordenar-produtos" class="form-select-filtro">
-                        <option value="nome-asc">Ordenar por Nome (A-Z)</option>
-                        <option value="nome-desc">Ordenar por Nome (Z-A)</option>
-                        <option value="preco-asc">Ordenar por Preço (Menor)</option>
-                        <option value="preco-desc">Ordenar por Preço (Maior)</option>
-                        <option value="estoque-asc">Ordenar por Estoque (Menor)</option>
-                        <option value="estoque-desc">Ordenar por Estoque (Maior)</option>
-                        <option value="id-asc">Ordenar por ID</option>
-                    </select>
+                    <div class="graficos-container">
+                        <div class="grafico-card">
+                            <h4>Vendas por Categoria</h4>
+                            <canvas id="grafico-vendas-categoria"></canvas>
+                        </div>
+                        <div class="grafico-card">
+                            <h4>Tendência de Vendas</h4>
+                            <canvas id="grafico-tendencia-vendas"></canvas>
+                        </div>
+                    </div>
 
-                    <button id="btn-abrir-modal-produto" class="btn btn-primario btn-adicionar-produto">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 8px; vertical-align: middle;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
-                        Adicionar Produto
-                    </button>
+                    <div class="card-secao secao-tabela-detalhada">
+                         <h3>Detalhes das Vendas</h3>
+                         <input type="text" id="filtro-geral" placeholder="Filtrar em todas as colunas...">
+                         <div class="tabela-responsiva-container">
+                            <table>
+                                <thead>
+                                    <tr id="cabecalho-tabela"></tr>
+                                </thead>
+                                <tbody id="corpo-tabela-vendas"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="loading-message" class="status-mensagem" style="display:none;">Carregando dados...</div>
+                    <div id="error-message" class="status-mensagem" style="display:none;"></div>
+                    <div id="no-data-message" class="status-mensagem" style="display:none;"></div>
                 </div>
 
-                <div id="loading-produtos-message" class="status-mensagem info" style="display:none; justify-content: center; padding: 20px;">Carregando produtos...</div>
-                <div id="produtos-grid-container" class="grid-produtos-responsivo">
-                    </div>
-                <div id="no-products-message" class="status-mensagem info" style="display:none; justify-content: center; padding: 20px;">Nenhum produto encontrado ou para exibir.</div>
+                <div id="secao-clientes" class="dashboard-section" style="display: none;">
+                    <h2>Clientes</h2>
+                    <p>Conteúdo da seção de clientes aqui...</p>
+                </div>
+                <div id="secao-configuracoes" class="dashboard-section" style="display: none;">
+                     <h2>Configurações</h2>
+                    <p>Conteúdo da seção de configurações aqui...</p>
+                </div>
+            </div> 
+        </div> 
+    </div> 
 
-            </main>
-        </div>
-    </div>
-
-    <div id="modal-produto" class="modal-overlay">
-        <div class="modal-container">
-            <header class="modal-header">
-                <h3 id="modal-titulo-produto">Adicionar Novo Produto</h3>
-                <button class="modal-close-btn" aria-label="Fechar modal">&times;</button>
-            </header>
-            <div class="modal-body">
-                <form id="form-produto" novalidate>
-                    <input type="hidden" id="produto-id-modal">
-
-                    <div class="form-grupo">
-                        <label for="produto-nome-modal">Nome do Produto:</label>
-                        <input type="text" id="produto-nome-modal" name="produtoNome" required>
-                    </div>
-
-                    <div class="form-grupo">
-                        <label for="produto-categoria-modal">Categoria:</label>
-                        <select id="produto-categoria-modal" name="produtoCategoria" required>
-                            <option value="" disabled selected>Selecione uma categoria</option>
-                            <option value="Vestidos">Vestidos</option>
-                            <option value="Calças">Calças</option>
-                            <option value="Blusas">Blusas</option>
-                            <option value="Saias">Saias</option>
-                            <option value="Acessorios">Acessórios</option>
-                            <option value="Calcados">Calçados</option>
-                            <option value="Casacos">Casacos</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-
-                    <div class="form-grupo">
-                        <label for="produto-preco-modal">Preço (R$):</label>
-                        <input type="number" id="produto-preco-modal" name="produtoPreco" step="0.01" min="0" required placeholder="ex: 199.90">
-                    </div>
-
-                    <div class="form-grupo">
-                        <label for="produto-estoque-modal">Estoque (Unidades):</label>
-                        <input type="number" id="produto-estoque-modal" name="produtoEstoque" step="1" min="0" required placeholder="ex: 10">
-                    </div>
-
-                    <div class="form-grupo">
-                        <label for="produto-descricao-modal">Descrição (Opcional):</label>
-                        <textarea id="produto-descricao-modal" name="produtoDescricao" rows="4"></textarea>
-                    </div>
-                </form>
-            </div>
-            <footer class="modal-footer">
-                <button type="button" id="btn-cancelar-modal-produto" class="btn btn-secundario">Cancelar</button>
-                <button type="submit" form="form-produto" class="btn btn-primario btn-salvar-produto">
-                    Salvar Produto
-                </button>
-            </footer>
-        </div>
-    </div>
-
-    <script src="js/dist/produtos.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/dist/vendas.js" defer></script> 
 </body>
 </html>
