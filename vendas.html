@@ -9,154 +9,179 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
     
     <style>
-        /* Estilos Gerais para o Layout do Dashboard */
-        .dashboard-page-content .dashboard-section {
-            padding: 1rem; /* Adiciona um pouco de espaçamento interno */
+        /* Reset Básico e Estilos Globais */
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--cor-fundo-app-dark, #111827); /* Fundo geral mais escuro */
+            color: var(--cor-texto-principal-dark, #e5e7eb);
         }
 
+        .dashboard-layout {
+            display: flex; 
+            min-height: 100vh; 
+        }
+
+        /* .dashboard-sidebar { (estilos da sua sidebar no seu CSS externo) } */
+
+        .dashboard-main-content {
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column; 
+            height: 100vh; 
+            overflow-y: hidden; 
+        }
+
+        .dashboard-header-main {
+            flex-shrink: 0; 
+            /* (estilos do seu header no seu CSS externo) */
+            /* Ex: background: var(--cor-fundo-header-dark, #1f2937); color: var(--cor-texto-principal-dark, #e5e7eb); */
+        }
+        
+        .dashboard-page-content {
+            padding: 1rem; /* ou 1.5rem */
+            flex-grow: 1; 
+            overflow-y: auto; 
+        }
+
+        /* KPIs */
         .kpi-cards-container {
             display: flex;
-            flex-wrap: wrap; /* Permite que os cards quebrem para a próxima linha */
-            gap: 1rem;       /* Espaçamento entre os cards de KPI */
+            flex-wrap: wrap; 
+            gap: 1rem;       
             margin-bottom: 1.5rem;
         }
-
         .kpi-card {
-            flex: 1; /* Faz com que os cards tentem ocupar o espaço disponível igualmente */
-            min-width: 200px; /* Largura mínima para cada card de KPI */
-            background: var(--cor-fundo-cards-dark, #ffffff); /* Cor de fundo do card */
+            flex: 1 1 200px; 
+            background: var(--cor-fundo-cards-dark, #1f2937); 
             padding: 1rem;
             border-radius: 0.5rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra suave */
+            /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */ /* Sombra pode não ser ideal em tema escuro total */
+            border: 1px solid var(--cor-bordas-dark, #374151);
         }
-        .kpi-card h4 {
-            margin-top: 0;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--cor-texto-secundario-dark, #555);
-        }
-        .kpi-card p {
-            font-size: 1.6rem;
-            font-weight: bold;
-            margin: 0;
-            color: var(--cor-texto-principal-dark, #111);
-        }
+        .kpi-card h4 { margin-top: 0; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--cor-texto-secundario-dark, #9ca3af); }
+        .kpi-card p { font-size: 1.6rem; font-weight: bold; margin: 0; color: var(--cor-texto-principal-dark, #e5e7eb); }
 
+        /* Gráficos */
         .graficos-container {
             display: flex;
-            flex-wrap: wrap; /* Permite que os gráficos quebrem */
-            gap: 1rem;       /* Espaçamento entre os cards de gráfico */
+            flex-wrap: wrap; 
+            gap: 1rem;       
             margin-bottom: 1.5rem;
         }
-
         .grafico-card {
-            flex: 1; /* Tenta ocupar o espaço, bom para 2 gráficos lado a lado */
-            min-width: 280px; /* Largura mínima, ajusta se necessário */
-            max-width: calc(50% - 0.5rem); /* Para 2 colunas, considerando o gap. Ajuste se quiser mais ou menos colunas. */
-            background: var(--cor-fundo-cards-dark, #ffffff);
+            flex: 1 1 calc(50% - 1rem); 
+            min-width: 280px; 
+            background: var(--cor-fundo-cards-dark, #1f2937);
             padding: 1rem;
             border-radius: 0.5rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            min-height: 300px; /* Altura mínima para o gráfico caber bem */
-            display: flex; /* Para alinhar o título e o canvas */
-            flex-direction: column; /* Título acima, canvas abaixo */
+            border: 1px solid var(--cor-bordas-dark, #374151);
+            height: 350px; 
+            display: flex; 
+            flex-direction: column; 
         }
-        .grafico-card h4 {
-            margin-top: 0;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-        .grafico-card canvas {
-            max-width: 100%; /* Garante que o canvas não estoure o card */
-            flex-grow: 1; /* Faz o canvas ocupar o espaço restante no card */
-        }
+        .grafico-card h4 { margin-top: 0; margin-bottom: 1rem; text-align: center; flex-shrink: 0; color: var(--cor-texto-principal-dark, #e5e7eb); }
+        .grafico-card canvas { max-width: 100%; max-height: 100%; object-fit: contain; flex-grow: 1; }
 
+        /* Tabela e Filtro */
         .card-secao.secao-tabela-detalhada {
-            background: var(--cor-fundo-cards-dark, #ffffff);
+            background: var(--cor-fundo-cards-dark, #1f2937);
             padding: 1rem;
             border-radius: 0.5rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid var(--cor-bordas-dark, #374151);
             margin-bottom: 1.5rem;
+            display: flex; 
+            flex-direction: column;
         }
-        .card-secao.secao-tabela-detalhada h3 {
-            margin-top: 0;
+        .card-secao.secao-tabela-detalhada h3 { margin-top: 0; margin-bottom: 1rem; flex-shrink: 0; color: var(--cor-texto-principal-dark, #e5e7eb); }
+        
+        /* ESTILOS PARA O INPUT DE FILTRO - NOVO/AJUSTADO */
+        #filtro-geral {
             margin-bottom: 1rem;
-        }
-        .tabela-responsiva-container {
-            overflow-x: auto; /* Permite scroll horizontal na tabela se ela for muito larga */
-        }
-        .tabela-responsiva-container table {
+            padding: 0.75rem 1rem; /* Aumentado o padding para melhor toque/visual */
             width: 100%;
-            border-collapse: collapse;
+            box-sizing: border-box;
+            background-color: var(--cor-fundo-input-dark, #2d3748); /* Cor de fundo escura para input */
+            color: var(--cor-texto-principal-dark, #e5e7eb); /* Cor do texto no input */
+            border: 1px solid var(--cor-bordas-dark, #374151);
+            border-radius: 0.375rem; /* um pouco mais arredondado */
             font-size: 0.9rem;
         }
-        .tabela-responsiva-container th,
-        .tabela-responsiva-container td {
+        #filtro-geral::placeholder {
+            color: var(--cor-texto-placeholder-dark, #6b7280); /* Cor para o placeholder */
+        }
+
+        .tabela-responsiva-container {
+            overflow-x: auto; 
+            overflow-y: auto; 
+            max-height: 500px; 
+            flex-grow: 1; 
+        }
+        .tabela-responsiva-container table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        
+        /* ESTILOS PARA CABEÇALHO DA TABELA - NOVO/AJUSTADO */
+        .tabela-responsiva-container thead th {
+            background-color: var(--cor-fundo-th-dark, #374151); /* Fundo escuro para cabeçalho da tabela */
+            color: var(--cor-texto-principal-dark, #e5e7eb);
+            font-weight: 600;
+            position: sticky; 
+            top: 0; 
+            z-index: 1; 
             padding: 0.75rem;
             text-align: left;
-            border-bottom: 1px solid var(--cor-bordas-dark, #eee);
+            border-bottom: 2px solid var(--cor-primaria-accent-dark, #8B5CF6); /* Borda inferior destacada */
         }
-        .tabela-responsiva-container thead th {
-            background-color: var(--cor-fundo-accent-dark, #f8f9fa);
-            font-weight: 600;
-            position: sticky; /* Para cabeçalho fixo no scroll vertical, se o container tiver altura definida e overflow-y */
-            top: 0;
+        
+        /* ESTILOS PARA CÉLULAS DO CORPO DA TABELA - NOVO/AJUSTADO */
+        .tabela-responsiva-container tbody td { 
+            padding: 0.75rem; 
+            text-align: left; 
+            border-bottom: 1px solid var(--cor-bordas-dark, #374151);
+            color: var(--cor-texto-secundario-dark, #9ca3af); /* Cor de texto para células */
         }
-        .coluna-numero {
-            text-align: right !important;
+        /* Opcional: Efeito hover nas linhas da tabela */
+        .tabela-responsiva-container tbody tr:hover td {
+            background-color: var(--cor-fundo-hover-linha-dark, #252f3e); /* Um pouco mais claro no hover */
+            color: var(--cor-texto-principal-dark, #e5e7eb);
         }
-        .coluna-monetaria::before {
-            content: "R$ "; /* Adiciona R$ antes de valores monetários se você removeu do JS */
-            /* Se o formatarMoedaVendas já inclui R$, você pode remover esta linha */
-        }
+
+        .coluna-numero { text-align: right !important; }
+        /* .coluna-monetaria::before { } */
 
         /* Mensagens de status */
         #loading-message, #error-message, #no-data-message {
-            padding: 20px;
-            text-align: center;
-            border-radius: 0.5rem;
-            margin: 1rem 0;
+            padding: 20px; text-align: center; border-radius: 0.5rem; margin: 1rem 0;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--cor-bordas-dark, #374151);
+            background-color: var(--cor-fundo-cards-dark, #1f2937);
         }
-        #loading-message { background-color: #eef; border: 1px solid #ccf; }
-        #error-message { background-color: #fee; border: 1px solid #fcc; color: #a00; }
-        #no-data-message { background-color: #eff; border: 1px solid #cff; }
+        #error-message { color: #f87171; /* Vermelho claro para erro em tema escuro */ }
+        
+        .spinner { 
+            border: 4px solid rgba(255,255,255,0.1); /* Borda do spinner mais clara */
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--cor-primaria-accent-dark, #8B5CF6);
+            animation: spin 1s ease infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     </style>
-    </head>
+</head>
 <body>
     <div class="dashboard-layout">
         <aside class="dashboard-sidebar">
             <div class="sidebar-logo-container">
-                <a href="index.html" class="sidebar-logo" title="Página Inicial XuxuGlow">
-                    <img src="imagens/img.png" alt="Logo XuxuGlow" class="logo-imagem-sidebar">
-                </a>
+                <a href="index.html" class="sidebar-logo" title="Página Inicial XuxuGlow"><img src="imagens/img.png" alt="Logo XuxuGlow" class="logo-imagem-sidebar"></a>
             </div>
             <nav>
                 <ul class="sidebar-nav">
-                    <li>
-                        <a href="#dashboard" data-target="secao-dashboard" data-title="Visão Geral das Vendas" class="active"> 
-                            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path></svg></span> 
-                            Dashboard
-                        </a>
-                    </li>
-                    <li>
-                        <a href="produtos.html" data-title="Gerenciamento de Produtos">
-                            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></span> 
-                            Produtos
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#clientes" data-target="secao-clientes" data-title="Clientes">
-                             <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> 
-                             Clientes
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#configuracoes" data-target="secao-configuracoes" data-title="Configurações">
-                             <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> 
-                             Configurações
-                        </a>
-                    </li>
+                    <li><a href="#dashboard" data-target="secao-dashboard" data-title="Visão Geral das Vendas" class="active"> <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path></svg></span> Dashboard</a></li>
+                    <li><a href="produtos.html" data-title="Gerenciamento de Produtos"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></span> Produtos</a></li>
+                    <li><a href="#clientes" data-target="secao-clientes" data-title="Clientes"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> Clientes</a></li>
+                    <li><a href="#configuracoes" data-target="secao-configuracoes" data-title="Configurações"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> Configurações</a></li>
                 </ul>
             </nav>
         </aside>
@@ -165,7 +190,7 @@
             <header class="dashboard-header-main">
                 <div class="header-left">
                     <button class="menu-toggle-btn" aria-label="Abrir menu" aria-expanded="false">☰</button>
-                    <h2 id="dashboard-titulo-secao">Visão Geral das Vendas</h2>
+                    <h2 id="dashboard-titulo-secao">Visão Geral das Vendas</h2> 
                 </div>
                 <div class="header-right">
                     <input type="search" placeholder="Buscar..." class="dashboard-search" aria-label="Buscar no dashboard"/>
@@ -176,55 +201,35 @@
             <div class="dashboard-page-content">
                 <div id="secao-dashboard" class="dashboard-section" style="display: block;"> 
                     <div class="kpi-cards-container">
-                        <div class="kpi-card">
-                            <h4>Total de Vendas</h4>
-                            <p id="kpi-total-vendas">R$ 0,00</p>
-                        </div>
-                        <div class="kpi-card">
-                            <h4>Nº de Transações</h4>
-                            <p id="kpi-num-transacoes">0</p>
-                        </div>
-                        <div class="kpi-card">
-                            <h4>Ticket Médio</h4>
-                            <p id="kpi-ticket-medio">R$ 0,00</p>
-                        </div>
+                        <div class="kpi-card"><h4>Total de Vendas</h4><p id="kpi-total-vendas">R$ 0,00</p></div>
+                        <div class="kpi-card"><h4>Nº de Transações</h4><p id="kpi-num-transacoes">0</p></div>
+                        <div class="kpi-card"><h4>Ticket Médio</h4><p id="kpi-ticket-medio">R$ 0,00</p></div>
                     </div>
-
                     <div class="graficos-container">
-                        <div class="grafico-card">
-                            <h4>Vendas por Categoria</h4>
-                            <canvas id="grafico-vendas-categoria"></canvas>
-                        </div>
-                        <div class="grafico-card">
-                            <h4>Tendência de Vendas</h4>
-                            <canvas id="grafico-tendencia-vendas"></canvas>
-                        </div>
+                        <div class="grafico-card"><h4>Vendas por Categoria</h4><canvas id="grafico-vendas-categoria"></canvas></div>
+                        <div class="grafico-card"><h4>Tendência de Vendas</h4><canvas id="grafico-tendencia-vendas"></canvas></div>
                     </div>
-
                     <div class="card-secao secao-tabela-detalhada">
                          <h3>Detalhes das Vendas</h3>
                          <input type="text" id="filtro-geral" placeholder="Filtrar em todas as colunas...">
                          <div class="tabela-responsiva-container">
                             <table>
-                                <thead>
-                                    <tr id="cabecalho-tabela"></tr>
-                                </thead>
+                                <thead><tr id="cabecalho-tabela"></tr></thead>
                                 <tbody id="corpo-tabela-vendas"></tbody>
                             </table>
                         </div>
                     </div>
-                    
                     <div id="loading-message" class="status-mensagem" style="display:none;">Carregando dados...</div>
                     <div id="error-message" class="status-mensagem" style="display:none;"></div>
                     <div id="no-data-message" class="status-mensagem" style="display:none;"></div>
                 </div>
 
                 <div id="secao-clientes" class="dashboard-section" style="display: none;">
-                    <h2>Clientes</h2>
+                    <h2 style="margin-top:0;">Clientes</h2>
                     <p>Conteúdo da seção de clientes aqui...</p>
                 </div>
                 <div id="secao-configuracoes" class="dashboard-section" style="display: none;">
-                     <h2>Configurações</h2>
+                     <h2 style="margin-top:0;">Configurações</h2>
                     <p>Conteúdo da seção de configurações aqui...</p>
                 </div>
             </div> 
