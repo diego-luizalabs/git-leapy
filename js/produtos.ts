@@ -1,3 +1,4 @@
+// interface Produto e dados mockados
 interface Produto {
     id: string;
     nome: string;
@@ -17,29 +18,26 @@ let dadosCompletosProdutos: Produto[] = [
     { id: "XG007", nome: "Tênis Esportivo Performance Max", categoria: "Calcados", preco: 499.90, estoque: 30, descricao: "Tênis ideal para suas atividades físicas com máximo conforto." },
     { id: "XG008", nome: "Jaqueta Corta-Vento Impermeável", categoria: "Casacos", preco: 299.00, estoque: 5, descricao: "Jaqueta leve e resistente à água." },
 ];
-
 let todosOsProdutosParaFiltragem: Produto[] = [...dadosCompletosProdutos];
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Produtos: Completamente carregado e analisado.");
+    console.log("PRODUTOS.TS: DOMContentLoaded INICIADO.");
 
     if (sessionStorage.getItem('isXuxuGlowAdminLoggedIn') !== 'true') {
-        console.warn("DOM Produtos: Utilizador não logado. Redirecionando para a página de login.");
-        window.location.href = 'index.html'; // Assumindo que index.html é sua página de login
+        console.warn("PRODUTOS.TS: Utilizador não logado. Redirecionando para login.");
+        window.location.href = 'index.html';
         return;
     }
-    console.log("DOM Produtos: Utilizador logado.");
+    console.log("PRODUTOS.TS: Utilizador logado.");
 
-    // --- Seletores de DOM para Produtos (mantenha os seus) ---
     const produtosGridContainer = document.getElementById('produtos-grid-container') as HTMLDivElement | null;
     const filtroBuscaProdutoInput = document.getElementById('filtro-busca-produto') as HTMLInputElement | null;
-    const filtroCategoriaSelect = document.getElementById('filtro-categoria-produto') as HTMLSelectElement | null;
+    const filtroCategoriaSelect = document.getElementById('filtro-categoria-produto') as HTMLSelectElement | null; 
     const filtroEstoqueSelect = document.getElementById('filtro-estoque-produto') as HTMLSelectElement | null;
     const ordenarProdutosSelect = document.getElementById('ordenar-produtos') as HTMLSelectElement | null;
-    
     const noProductsMessageDiv = document.getElementById('no-products-message') as HTMLDivElement | null;
     const loadingProdutosMessageDiv = document.getElementById('loading-produtos-message') as HTMLDivElement | null;
-
+    
     const modalProduto = document.getElementById('modal-produto') as HTMLDivElement | null;
     const modalTituloProduto = document.getElementById('modal-titulo-produto') as HTMLElement | null;
     const formProduto = document.getElementById('form-produto') as HTMLFormElement | null;
@@ -54,199 +52,195 @@ document.addEventListener('DOMContentLoaded', () => {
     const produtoEstoqueModalInput = document.getElementById('produto-estoque-modal') as HTMLInputElement | null;
     const produtoDescricaoModalTextarea = document.getElementById('produto-descricao-modal') as HTMLTextAreaElement | null;
 
-    // --- Seletores de DOM para Navegação e Sidebar ---
-    const sidebarProdutos = document.querySelector('.dashboard-sidebar') as HTMLElement | null; // Mantido
-    const menuToggleBtnProdutos = document.querySelector('.menu-toggle-btn') as HTMLButtonElement | null; // Mantido
-    const bodyProdutos = document.body; // Mantido
-    const navLinks = document.querySelectorAll<HTMLAnchorElement>('.sidebar-nav a'); // MODIFICADO: Nome mais genérico
-    const tituloSecaoElement = document.getElementById('dashboard-titulo-secao') as HTMLElement | null; // MODIFICADO: Nome mais genérico
-    
-    // NOVO: Seletor para todas as seções de conteúdo principal
-    const allContentSections = document.querySelectorAll<HTMLElement>('.content-section');
+    const sidebar = document.querySelector('.dashboard-sidebar') as HTMLElement | null;
+    const menuToggleBtn = document.querySelector('.menu-toggle-btn') as HTMLButtonElement | null;
+    const pageBody = document.body;
+    const navLinks = document.querySelectorAll<HTMLAnchorElement>('.sidebar-nav a');
+    const tituloSecaoElement = document.getElementById('main-section-title') as HTMLElement | null; 
+    const allInternalContentSections = document.querySelectorAll<HTMLElement>('.content-section'); 
 
-    // --- Lógica da Sidebar (Abrir/Fechar) - Mantida como estava ---
-    if (sidebarProdutos && menuToggleBtnProdutos) {
-        menuToggleBtnProdutos.addEventListener('click', () => {
-            console.log("Produtos.ts: Botão de menu da sidebar clicado.");
-            const isVisible = sidebarProdutos.classList.toggle('sidebar-visible');
-            bodyProdutos.classList.toggle('sidebar-overlay-active', isVisible);
-            menuToggleBtnProdutos.setAttribute('aria-expanded', isVisible.toString());
+    if (sidebar && menuToggleBtn) {
+        menuToggleBtn.addEventListener('click', () => {
+            const isVisible = sidebar.classList.toggle('sidebar-visible');
+            pageBody.classList.toggle('sidebar-overlay-active', isVisible);
+            menuToggleBtn.setAttribute('aria-expanded', isVisible.toString());
         });
-        bodyProdutos.addEventListener('click', (event) => {
-            if (bodyProdutos.classList.contains('sidebar-overlay-active') && sidebarProdutos.classList.contains('sidebar-visible')) {
+        pageBody.addEventListener('click', (event) => {
+            if (pageBody.classList.contains('sidebar-overlay-active') && sidebar.classList.contains('sidebar-visible')) {
                 const target = event.target as HTMLElement;
-                if (!sidebarProdutos.contains(target) && !menuToggleBtnProdutos.contains(target)) {
-                    console.log("Produtos.ts: Clique fora da sidebar, fechando sidebar.");
-                    sidebarProdutos.classList.remove('sidebar-visible');
-                    bodyProdutos.classList.remove('sidebar-overlay-active');
-                    menuToggleBtnProdutos.setAttribute('aria-expanded', 'false');
+                if (!sidebar.contains(target) && !menuToggleBtn.contains(target)) {
+                    sidebar.classList.remove('sidebar-visible');
+                    pageBody.classList.remove('sidebar-overlay-active');
+                    menuToggleBtn.setAttribute('aria-expanded', 'false');
                 }
             }
         });
     }
 
-    // --- NOVAS Funções de Navegação SPA ---
-    function updateActiveLinkAndTitle(activeLink: HTMLAnchorElement | null, newTitle?: string) {
-        console.log("SPA Nav: updateActiveLinkAndTitle chamado com link:", activeLink?.href, "Novo Título:", newTitle);
+    function updateActiveLinkAndTitleProdutos(activeLink: HTMLAnchorElement | null) {
+        const titleToUse = activeLink?.dataset.title || "Gerenciamento de Produtos";
+        console.log(`DEBUG PRODUTOS.TS (UpdateLink): Link: ${activeLink?.href}, Título: "${titleToUse}"`);
+        
         navLinks.forEach(navLink => navLink.classList.remove('active'));
-
         if (activeLink) {
             activeLink.classList.add('active');
-            const titleFromData = activeLink.dataset.title;
             if (tituloSecaoElement) {
-                tituloSecaoElement.textContent = newTitle || titleFromData || "Dashboard"; // Título fallback
-                console.log("SPA Nav: Título da seção atualizado para:", tituloSecaoElement.textContent);
+                tituloSecaoElement.textContent = titleToUse;
             }
         }
     }
 
-    function displaySection(sectionIdToShow: string, clickedLink: HTMLAnchorElement | null) {
-        console.log(`SPA Nav: Tentando exibir a seção: ${sectionIdToShow}`);
+    function displayInternalSectionProdutos(sectionIdToShow: string, clickedLink: HTMLAnchorElement | null) {
+        console.log(`DEBUG PRODUTOS.TS (DisplayInternal): Tentando exibir seção interna: ${sectionIdToShow}`);
         let sectionFound = false;
-        allContentSections.forEach(section => {
+        allInternalContentSections.forEach(section => {
             if (section.id === sectionIdToShow) {
-                section.style.display = 'block';
+                section.style.display = 'block'; 
+                section.classList.add('active');
                 sectionFound = true;
-                console.log(`SPA Nav: Exibindo ${section.id}`);
-
-                if (section.id === 'produtos-content') {
+                console.log(`DEBUG PRODUTOS.TS (DisplayInternal): Exibida ${section.id}`);
+                if (section.id === 'produtos-content') { 
                     if (loadingProdutosMessageDiv && produtosGridContainer) {
                         loadingProdutosMessageDiv.style.display = 'flex';
                         produtosGridContainer.style.display = 'none';
                         setTimeout(() => {
                             if(loadingProdutosMessageDiv) loadingProdutosMessageDiv.style.display = 'none';
                             renderizarGridProdutos(todosOsProdutosParaFiltragem);
-                            if(produtosGridContainer) produtosGridContainer.style.display = 'block'; // Ou o display que seu grid usa
-                            console.log("SPA Nav: Grid de produtos renderizado para seção de produtos.");
+                            if(produtosGridContainer) produtosGridContainer.style.display = 'block';
                         }, 50);
                     } else {
-                         console.warn("SPA Nav: Divs de loading/grid de produtos não encontradas ao tentar mostrar seção de produtos.");
-                         // Tenta renderizar diretamente se as divs não forem críticas para o loading
                          renderizarGridProdutos(todosOsProdutosParaFiltragem);
+                    }
+                } else if (section.id === 'dash-interno-content') { 
+                    console.log("PRODUTOS.TS (DisplayInternal): Mostrando #dash-interno-content.");
+                    const dashInternoMain = document.getElementById('secao-dash-interno-principal');
+                    if (dashInternoMain) { 
+                        dashInternoMain.innerHTML = `<h3>Painel Interno (Produtos)</h3> <p>Conteúdo do painel interno da página de produtos.</p>`;
                     }
                 }
             } else {
                 section.style.display = 'none';
+                section.classList.remove('active');
             }
         });
 
-        if (!sectionFound) {
-            console.warn(`SPA Nav: Nenhuma seção encontrada com o ID: ${sectionIdToShow}. Verifique os IDs no HTML e a convenção de nomes (ex: #produtos -> produtos-content).`);
-            // Fallback: mostrar a primeira seção ou uma seção padrão se a desejada não for encontrada
-            const defaultSection = document.getElementById('produtos-content') || document.querySelector<HTMLElement>('.content-section');
-            if (defaultSection) {
-                 defaultSection.style.display = 'block';
-                 const defaultLink = document.querySelector<HTMLAnchorElement>('.sidebar-nav a[href="#produtos"]'); // Tenta encontrar link de produtos
-                 updateActiveLinkAndTitle(defaultLink || (clickedLink?.href === `#${defaultSection.id.replace('-content', '')}` ? clickedLink : null) , defaultLink?.dataset.title || defaultSection.dataset.defaultTitle || "Página Inicial");
-
+        updateActiveLinkAndTitleProdutos(clickedLink); 
+        
+        if (!sectionFound && sectionIdToShow) {
+            console.warn(`DEBUG PRODUTOS.TS (DisplayInternal): Seção interna ${sectionIdToShow} não encontrada. Default para produtos-content.`);
+            const produtosContentDiv = document.getElementById('produtos-content');
+            if (produtosContentDiv) {
+                allInternalContentSections.forEach(s => s.style.display = s.id === 'produtos-content' ? 'block' : 'none');
+                if(produtosContentDiv) produtosContentDiv.classList.add('active');
+                updateActiveLinkAndTitleProdutos(document.querySelector('.sidebar-nav a[data-target-section="produtos-content"], .sidebar-nav a[href="#produtos"]'));
             }
-        } else if (clickedLink) {
-             updateActiveLinkAndTitle(clickedLink, clickedLink.dataset.title);
         }
     }
     
-    // --- MODIFICADO: Event Listener para Navegação da Sidebar ---
+    console.log("PRODUTOS.TS: Configurando listeners de navegação. Links encontrados:", navLinks.length);
     navLinks.forEach(link => {
         link.addEventListener('click', function(event: MouseEvent) {
             const currentAnchor = this;
             const href = currentAnchor.getAttribute('href');
-            console.log(`SPA Nav: Link da sidebar clicado! HREF: '${href}'`);
-    
-            if (!href) { 
-                console.warn("SPA Nav: Link clicado não possui um atributo href válido.");
+            const externalPageTarget = currentAnchor.dataset.externalPage;
+            const internalSectionTarget = currentAnchor.dataset.targetSection;
+
+            console.log(`DEBUG PRODUTOS.TS (Nav Main): Link clicado! HREF: '${href}', Data-External: '${externalPageTarget}', Data-Internal: '${internalSectionTarget}'`);
+
+            if (externalPageTarget) {
+                console.log(`DEBUG PRODUTOS.TS (Nav Main): ***DECISÃO: Navegando para data-external-page: '${externalPageTarget}'.***`);
                 event.preventDefault(); 
+                window.location.href = externalPageTarget;
                 return; 
             }
-    
-            const currentPagePath = window.location.pathname;
-            const isExternalOrDifferentPage = href.includes('.html') || href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//');
 
-            if (isExternalOrDifferentPage) {
-                let targetUrl;
+            if (href && (href.includes('.html') || href.startsWith('http:') || href.startsWith('https:') || href.startsWith('//'))) {
+                let targetUrl, currentPageUrl;
                 try {
                     targetUrl = new URL(href, window.location.origin);
-                     // Se for um path diferente de um arquivo .html, permita a navegação padrão
-                    if (targetUrl.pathname !== currentPagePath && href.includes('.html')) {
-                        console.log(`SPA Nav: Navegação para OUTRA página HTML (${href}). Permitindo ação padrão.`);
-                        return; // Deixa o navegador lidar com isso
+                    currentPageUrl = new URL(window.location.href);
+                    console.log(`DEBUG PRODUTOS.TS (Nav Main) - Checando href para .html: Path atual: ${currentPageUrl.pathname}, Path alvo: ${targetUrl.pathname}`);
+
+                    if (targetUrl.pathname !== currentPageUrl.pathname && href.includes('.html')) {
+                        console.log(`DEBUG PRODUTOS.TS (Nav Main): ***DECISÃO: Permitindo navegação padrão para OUTRA página HTML via href (${href}).***`);
+                        return; 
                     }
-                    // Se for um link externo absoluto, também permita
-                    if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//')) {
-                         console.log(`SPA Nav: Navegação para URL externa (${href}). Permitindo ação padrão.`);
+                    if (href.startsWith('http:') || href.startsWith('https:') || href.startsWith('//')) {
+                         console.log(`DEBUG PRODUTOS.TS (Nav Main): ***DECISÃO: Permitindo navegação padrão para URL externa via href (${href}).***`);
                         return;
                     }
-
                 } catch (e) {
-                    console.error(`SPA Nav: Erro ao parsear URL para href '${href}'.`, e);
-                    event.preventDefault(); // Previne comportamento inesperado
-                    return;
+                    console.error(`DEBUG PRODUTOS.TS (Nav Main): Erro ao parsear URL para href '${href}'.`, e);
+                    if (!href.startsWith('#')) { event.preventDefault(); return; }
                 }
             }
             
-            // Se chegou aqui, é uma navegação interna (SPA) ou um link que não deve navegar
+            console.log(`DEBUG PRODUTOS.TS (Nav Main): ***DECISÃO: Prevenindo Navegação Padrão*** e tratando como SPA interna para HREF: '${href}', Data-Internal: '${internalSectionTarget}'.`);
             event.preventDefault();
-            console.log(`SPA Nav: Navegação interna ou link especial (HREF: '${href}'). Prevenindo padrão.`);
-    
-            let targetSectionId = '';
-            if (href.startsWith('#') && href.length > 1) {
-                targetSectionId = href.substring(1) + "-content"; // Convenção: #nome -> nome-content
-                displaySection(targetSectionId, currentAnchor);
-            } else {
-                console.warn(`SPA Nav: Href '${href}' não é um formato esperado para navegação de seção (ex: #nomedasecao). Nenhuma ação de display tomada.`);
-                // Apenas atualiza o link ativo se não souber qual seção mostrar
-                updateActiveLinkAndTitle(currentAnchor, currentAnchor.dataset.title);
+            
+            let sectionIdToShow: string | null = null;
+
+            if (internalSectionTarget) { 
+                sectionIdToShow = internalSectionTarget;
+            } else if (href && href.startsWith('#') && href.length > 1) { 
+                const hashValue = href.substring(1);
+                sectionIdToShow = document.getElementById(hashValue)?.classList.contains('content-section') ? hashValue : hashValue + "-content";
             }
-    
-            // Lógica para fechar a sidebar em dispositivos móveis
-            if (sidebarProdutos && sidebarProdutos.classList.contains('sidebar-visible') && window.innerWidth < 992 && menuToggleBtnProdutos) {
-                console.log("SPA Nav: Fechando sidebar após clique em link (mobile).");
-                sidebarProdutos.classList.remove('sidebar-visible');
-                bodyProdutos.classList.remove('sidebar-overlay-active');
-                menuToggleBtnProdutos.setAttribute('aria-expanded', 'false');
+
+            if (sectionIdToShow) {
+                console.log(`DEBUG PRODUTOS.TS (Nav Main): SPA targetSectionId: '${sectionIdToShow}'`);
+                displayInternalSectionProdutos(sectionIdToShow, currentAnchor);
+                if (href && href.startsWith('#') && window.location.hash !== href) {
+                    history.pushState({ section: sectionIdToShow }, "", href);
+                }
+            } else {
+                console.warn(`DEBUG PRODUTOS.TS (Nav Main): SPA Link (${href}) sem um alvo interno claro. Verifique href, data-target-section, e IDs.`);
+                updateActiveLinkAndTitleProdutos(currentAnchor);
+            }
+            
+            if (sidebar && sidebar.classList.contains('sidebar-visible') && window.innerWidth < 992 && menuToggleBtn) {
+                sidebar.classList.remove('sidebar-visible');
+                pageBody.classList.remove('sidebar-overlay-active');
+                menuToggleBtn.setAttribute('aria-expanded', 'false');
             }
         });
     });
 
-    // --- MODIFICADO: Função para Lidar com Carregamento Inicial da Página ---
-    function handlePageLoad() {
-        console.log("SPA Nav: handlePageLoad chamado.");
-        let initialSectionHref = window.location.hash || "#produtos"; // Padrão para #produtos se não houver hash
-    
-        // Garante que o href comece com #
-        if (!initialSectionHref.startsWith('#')) {
-            initialSectionHref = "#" + initialSectionHref;
-        }
-        // Se for apenas "#", defina como #produtos (ou sua seção padrão)
-        if (initialSectionHref === "#") {
-            initialSectionHref = "#produtos";
-        }
+    function handleProductPageLoad() {
+        console.log("DEBUG PRODUTOS.TS (handlePageLoad): INICIADO. Hash:", location.hash);
+        
+        let initialSectionId = "produtos-content"; 
+        let initialLink: HTMLAnchorElement | null = document.querySelector(`.sidebar-nav a[data-target-section="produtos-content"], .sidebar-nav a[href="#produtos"]`);
 
-        const initialLink = document.querySelector(`.sidebar-nav a[href="${initialSectionHref}"]`) as HTMLAnchorElement | null;
-        const sectionId = initialSectionHref.substring(1) + "-content";
-    
-        if (initialLink) {
-            displaySection(sectionId, initialLink);
-        } else {
-            console.warn(`SPA Nav: Não foi possível encontrar o link inicial para href="${initialSectionHref}". Tentando carregar seção diretamente ou fallback.`);
-            // Tenta carregar a seção de produtos como fallback se o link específico não for encontrado
-            const fallbackLinkProdutos = document.querySelector('.sidebar-nav a[href="#produtos"]') as HTMLAnchorElement | null;
-            if (fallbackLinkProdutos) {
-                displaySection("produtos-content", fallbackLinkProdutos);
+        if (window.location.hash && window.location.hash !== "#") {
+            const hashValue = window.location.hash.substring(1);
+            const linkForHash = document.querySelector(`.sidebar-nav a[href="${window.location.hash}"]`) as HTMLAnchorElement | null;
+            
+            let potentialSectionIdFromHash = linkForHash?.dataset.targetSection;
+            if (!potentialSectionIdFromHash) {
+                 potentialSectionIdFromHash = document.getElementById(hashValue)?.classList.contains('content-section') 
+                    ? hashValue 
+                    : hashValue + "-content";
+            }
+            
+            const sectionElement = document.getElementById(potentialSectionIdFromHash);
+            if (sectionElement && sectionElement.classList.contains('content-section')) {
+                initialSectionId = potentialSectionIdFromHash;
+                initialLink = linkForHash || document.querySelector(`.sidebar-nav a[data-target-section="${initialSectionId}"]`);
+                console.log(`DEBUG PRODUTOS.TS (handlePageLoad): Carregando seção interna pelo hash: ${initialSectionId}`);
             } else {
-                console.error("SPA Nav: Link de fallback para #produtos também não encontrado. Verifique a sidebar.");
-                // Último recurso: tenta exibir a primeira seção de conteúdo
-                const firstContentSection = document.querySelector<HTMLElement>('.content-section');
-                if (firstContentSection) {
-                    // Tenta encontrar um link que corresponda à primeira seção ou usa null
-                    const correspondingLink = document.querySelector<HTMLAnchorElement>(`.sidebar-nav a[href="#${firstContentSection.id.replace('-content','')}"]`);
-                    displaySection(firstContentSection.id, correspondingLink);
-                }
+                 console.log(`DEBUG PRODUTOS.TS (handlePageLoad): Hash '${window.location.hash}' não corresponde a uma seção interna 'content-section' válida. Carregando default (${initialSectionId}).`);
             }
         }
+        
+        console.log(`DEBUG PRODUTOS.TS (handlePageLoad): Seção inicial a ser exibida: ${initialSectionId}`);
+        if (!initialLink && initialSectionId === "produtos-content") {
+            initialLink = document.querySelector('.sidebar-nav a[href="#produtos"], .sidebar-nav a[data-target-section="produtos-content"]');
+        }
+        displayInternalSectionProdutos(initialSectionId, initialLink);
     }
     
-
-    // --- Lógica Específica de Produtos (funções como getIconeParaCategoria, renderizarGridProdutos, etc. - MANTIDAS COMO ESTAVAM) ---
+    // --- Suas funções de produto (COPIADAS DO SEU ARQUIVO DAS 08:03) ---
     function getIconeParaCategoria(categoria: string): string {
         const catLower = categoria.toLowerCase();
         if (catLower.includes('vestido')) return `<svg class="icone-produto categoria-vestido" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.36,8.89,18.7,7.48,19.05,5.2H4.95L5.3,7.48,3.64,8.89C3.25,9.21,3,9.67,3,10.17V20a1,1,0,0,0,1,1H20a1,1,0,0,0,1-1V10.17C21,9.67,20.75,9.21,20.36,8.89ZM8,18H6V13a2,2,0,0,1,4,0v5H8Zm4,0H10V11h4v7Zm4,0H16V13a2,2,0,0,1,4,0v5h-2ZM6.95,3.05,12,6.1,17.05,3.05A1,1,0,0,0,16.32,2H7.68A1,1,0,0,0,6.95,3.05Z"/></svg>`;
@@ -259,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderizarGridProdutos(produtos: Produto[]): void {
-        if (!produtosGridContainer) { console.error("Container do grid de produtos não encontrado!"); return; }
+        if (!produtosGridContainer) { console.error("PRODUTOS.TS: produtosGridContainer é null em renderizarGridProdutos"); return; }
         produtosGridContainer.innerHTML = ''; 
         if (produtos.length === 0) {
             if (noProductsMessageDiv) noProductsMessageDiv.style.display = 'flex';
@@ -288,13 +282,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn btn-acao-excluir" title="Excluir Produto" data-id-produto="${produto.id}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
                 </div>`;
             produtosGridContainer.appendChild(card);
-            card.querySelector('.btn-acao-editar')?.addEventListener('click', () => abrirModalParaEdicao(produto.id));
-            card.querySelector('.btn-acao-excluir')?.addEventListener('click', () => excluirProduto(produto.id));
+            card.querySelector<HTMLButtonElement>('.btn-acao-editar')?.addEventListener('click', () => abrirModalParaEdicao(produto.id));
+            card.querySelector<HTMLButtonElement>('.btn-acao-excluir')?.addEventListener('click', () => excluirProduto(produto.id));
         });
     }
 
     function aplicarFiltrosEOrdenar(): void {
-        let produtosFiltrados = [...todosOsProdutosParaFiltragem];
+        let produtosFiltrados = [...dadosCompletosProdutos];
         const termoBusca = filtroBuscaProdutoInput?.value.toLowerCase() || '';
         const categoriaSelecionada = filtroCategoriaSelect?.value || '';
         const estoqueSelecionado = filtroEstoqueSelect?.value || '';
@@ -318,7 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'estoque-desc': produtosFiltrados.sort((a, b) => b.estoque - a.estoque); break;
             case 'id-asc': produtosFiltrados.sort((a, b) => a.id.localeCompare(b.id)); break;
         }
-        renderizarGridProdutos(produtosFiltrados);
+        todosOsProdutosParaFiltragem = produtosFiltrados;
+        renderizarGridProdutos(todosOsProdutosParaFiltragem);
     }
     
     filtroBuscaProdutoInput?.addEventListener('input', aplicarFiltrosEOrdenar);
@@ -328,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function preencherFormularioModal(produto?: Produto) {
         if (!formProduto || !produtoIdModalInput || !produtoNomeModalInput || !produtoCategoriaModalSelect || !produtoPrecoModalInput || !produtoEstoqueModalInput || !produtoDescricaoModalTextarea || !modalTituloProduto) {
-            console.error("Erro: Um ou mais elementos do formulário do modal não foram encontrados no DOM."); return;
+            console.error("PRODUTOS.TS: Elementos do formulário do modal não encontrados."); return;
         }
         if (produto) {
             modalTituloProduto.textContent = `Editar Produto: ${produto.nome}`;
@@ -340,80 +335,66 @@ document.addEventListener('DOMContentLoaded', () => {
             produtoDescricaoModalTextarea.value = produto.descricao || '';
         } else {
             modalTituloProduto.textContent = 'Adicionar Novo Produto';
-            formProduto.reset(); // Limpa o formulário
-             // Gera um ID simples para novo produto (pode ser melhorado para garantir unicidade)
+            formProduto.reset(); 
             produtoIdModalInput.value = `XG${Math.floor(Math.random() * 8999) + 1000}`;
         }
     }
 
     function abrirModalParaEdicao(produtoId: string) {
-        console.log(`Produtos.ts: Tentando abrir modal para editar produto ID: ${produtoId}`);
-        const produtoParaEditar = todosOsProdutosParaFiltragem.find(p => p.id === produtoId);
+        const produtoParaEditar = dadosCompletosProdutos.find(p => p.id === produtoId);
         if (produtoParaEditar) {
             preencherFormularioModal(produtoParaEditar);
             if (modalProduto) modalProduto.classList.add('modal-visible');
-            else console.error("Produtos.ts: Elemento modalProduto não encontrado ao tentar editar.");
-        } else { console.error(`Produtos.ts: Produto com ID ${produtoId} não encontrado para edição.`); }
+        } else { console.error(`PRODUTOS.TS: Produto com ID ${produtoId} não encontrado para edição.`); }
     }
     
     function abrirModalParaAdicionar() {
-        console.log("Produtos.ts: Tentando abrir modal para adicionar novo produto...");
-        preencherFormularioModal(); // Chama sem produto para resetar e configurar para adição
-        if (modalProduto) {
-            modalProduto.classList.add('modal-visible');
-            console.log("Produtos.ts: Classe 'modal-visible' adicionada ao modalProduto.");
-        } else { console.error("Produtos.ts: Elemento modalProduto não encontrado ao tentar adicionar."); }
+        preencherFormularioModal(); 
+        if (modalProduto) modalProduto.classList.add('modal-visible');
     }
 
     function fecharModalProduto() {
-        console.log("Produtos.ts: Tentando fechar modalProduto.");
         if (modalProduto) modalProduto.classList.remove('modal-visible');
     }
 
     if(btnAbrirModalProduto) btnAbrirModalProduto.addEventListener('click', abrirModalParaAdicionar);
-    else console.error("Produtos.ts: Botão 'btn-abrir-modal-produto' não encontrado.");
-    
     if(btnCloseModalProduto) btnCloseModalProduto.addEventListener('click', fecharModalProduto);
-    else console.warn("Produtos.ts: Botão 'modal-close-btn' não encontrado dentro do modalProduto.");
-    
     if(btnCancelarModalProduto) btnCancelarModalProduto.addEventListener('click', fecharModalProduto);
-    else console.warn("Produtos.ts: Botão 'btn-cancelar-modal-produto' não encontrado.");
-    
     modalProduto?.addEventListener('click', (event) => { if (event.target === modalProduto) fecharModalProduto(); });
 
-    formProduto?.addEventListener('submit', (event) => {
+    formProduto?.addEventListener('submit', (event: Event) => { // Adicionado tipo Event aqui
         event.preventDefault();
-        console.log("Produtos.ts: Formulário do modal submetido.");
         if (!produtoNomeModalInput || !produtoCategoriaModalSelect || !produtoPrecoModalInput || !produtoEstoqueModalInput || !produtoIdModalInput || !produtoDescricaoModalTextarea ) {
-             console.error("Produtos.ts: Erro ao salvar: Campos do formulário do modal não encontrados."); return;
+            console.error("PRODUTOS.TS: Erro ao salvar: Campos do formulário do modal não encontrados."); return;
         }
         const idProduto = produtoIdModalInput.value;
+        const precoValor = produtoPrecoModalInput.value.replace(',', '.');
         const novoProduto: Produto = {
-            id: idProduto, // ID já deve estar preenchido (seja existente ou novo gerado)
+            id: idProduto, 
             nome: produtoNomeModalInput.value, 
             categoria: produtoCategoriaModalSelect.value,
-            preco: parseFloat(produtoPrecoModalInput.value.replace(',', '.')), // Trata vírgula no preço
+            preco: parseFloat(precoValor), 
             estoque: parseInt(produtoEstoqueModalInput.value), 
             descricao: produtoDescricaoModalTextarea.value
         };
-        const indiceProdutoExistente = todosOsProdutosParaFiltragem.findIndex(p => p.id === idProduto);
-        if (indiceProdutoExistente > -1) {
-            todosOsProdutosParaFiltragem[indiceProdutoExistente] = novoProduto; console.log('Produtos.ts: Produto editado:', novoProduto);
-        } else { todosOsProdutosParaFiltragem.unshift(novoProduto); console.log('Produtos.ts: Novo produto adicionado:', novoProduto); }
-        aplicarFiltrosEOrdenar(); fecharModalProduto();
+        const indiceProdutoOriginal = dadosCompletosProdutos.findIndex(p => p.id === idProduto);
+        if (indiceProdutoOriginal > -1) { 
+            dadosCompletosProdutos[indiceProdutoOriginal] = novoProduto;
+        } else { 
+            dadosCompletosProdutos.unshift(novoProduto);
+        }
+        todosOsProdutosParaFiltragem = [...dadosCompletosProdutos];
+        aplicarFiltrosEOrdenar(); 
+        fecharModalProduto(); 
     });
 
     function excluirProduto(produtoId: string) {
         if (confirm(`Tem certeza que deseja excluir o produto com ID ${produtoId}?`)) {
-            todosOsProdutosParaFiltragem = todosOsProdutosParaFiltragem.filter(p => p.id !== produtoId);
-            // Também remova de dadosCompletosProdutos se for sua fonte original principal
             dadosCompletosProdutos = dadosCompletosProdutos.filter(p => p.id !== produtoId);
-            console.log(`Produtos.ts: Produto ${produtoId} excluído.`);
-            aplicarFiltrosEOrdenar();
+            todosOsProdutosParaFiltragem = [...dadosCompletosProdutos];
+            aplicarFiltrosEOrdenar(); 
         }
     }
     
-    // --- CHAMADA INICIAL PARA CARREGAR A PÁGINA/SEÇÃO ---
-    handlePageLoad(); // NOVO: Chama a função de carregamento de página que decide qual seção mostrar
-
+    handleProductPageLoad(); 
 });
