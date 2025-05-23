@@ -1,0 +1,19 @@
+// Conteúdo para o arquivo backend/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2020",                        // Versão do JavaScript que será gerada
+    "module": "commonjs",                     // Sistema de módulos usado pelo Node.js
+    "rootDir": "./src",                       // Pasta onde estarão seus arquivos .ts
+    "outDir": "./dist",                       // Pasta onde o JavaScript compilado será salvo
+    "esModuleInterop": true,                  // Permite interoperabilidade com módulos CommonJS
+    "forceConsistentCasingInFileNames": true, // Garante que os nomes dos arquivos sejam consistentes no case
+    "strict": true,                           // Habilita todas as checagens de tipo estritas
+    "skipLibCheck": true,                     // Pula a checagem de tipos de arquivos de declaração (.d.ts)
+    "resolveJsonModule": true,                // Permite importar arquivos .json
+    "moduleResolution": "node",               // Como o Node.js resolve módulos
+    "sourceMap": true,                        // Gera .map files para debugging (útil)
+    "baseUrl": "."                            // Define a base para caminhos de importação (opcional)
+  },
+  "include": ["src/**/*"],                    // Diz ao compilador para incluir todos os arquivos .ts dentro da pasta src
+  "exclude": ["node_modules", "**/*.spec.ts"] // Pastas/arquivos a serem ignorados pela compilação
+}
