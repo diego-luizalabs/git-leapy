@@ -3,16 +3,9 @@
 console.log("LOG INICIAL: js/vendas.ts foi lido e está sendo processado.");
 
 // 1. DECLARAÇÕES GLOBAIS para TypeScript
-// Estas linhas informam ao TypeScript que Chart e ChartDataLabels existirão globalmente em tempo de execução.
-// Certifique-se de que os scripts correspondentes (Chart.js e chartjs-plugin-datalabels.min.js)
-// são carregados no seu HTML ANTES deste script.
-declare var Chart: any; // Para Chart.js (idealmente, instale @types/chart.js para tipos mais precisos)
-declare var ChartDataLabels: any; // Para o plugin (idealmente, encontre ou crie um .d.ts para ele)
+declare var Chart: any; 
+declare var ChartDataLabels: any; 
 
-// A linha "import ChartDataLabels from '...esm.js';" FOI REMOVIDA.
-// O plugin deve ser carregado globalmente via <script> no HTML.
-
-// Registra o plugin datalabels com Chart.js
 if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined' && ChartDataLabels) {
     Chart.register(ChartDataLabels);
     console.log("DEBUG VENDAS (TS): chartjs-plugin-datalabels (global) e tentativa de registro feita.");
@@ -20,15 +13,12 @@ if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined' && Ch
     console.error("ERRO VENDAS (TS): Chart ou ChartDataLabels (global) não está definido. O plugin datalabels PODE NÃO FUNCIONAR. Verifique inclusões no HTML.");
 }
 
-// URL DA SUA PLANILHA PUBLICADA COMO CSV PARA VENDAS
 const URL_PLANILHA_CSV_VENDAS: string = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfu_bkc8cu1dNbItO9zktGmn4JjNjQEoLAzGcG9rZDyfDyDp4ISEqpPKzIFTWFrMNVIz05V3NTpGT/pub?output=csv';
 
-// 2. INTERFACE para os dados da planilha
 interface LinhaPlanilhaVendas {
-    [key: string]: string | number; // Permite chaves de string com valores string ou number
+    [key: string]: string | number; 
 }
 
-// 3. TIPOS EXPLÍCITOS para instâncias de gráficos
 let graficoCategoriaInstanceVendas: any = null;
 let graficoTendenciaInstanceVendas: any = null;
 
@@ -37,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (sessionStorage.getItem('isXuxuGlowAdminLoggedIn') !== 'true') {
         console.warn("DOM Vendas (TS): Usuário não logado. Redirecionando.");
-        window.location.href = 'index.html'; // Ou sua página de login
+        window.location.href = 'index.html'; 
         return;
     }
     console.log("DOM Vendas (TS): Usuário logado.");
@@ -54,20 +44,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const chartDatasetColorsDark: string[] = [
         computedStyles.getPropertyValue('--cor-primaria-accent-dark').trim() || '#8B5CF6',
         computedStyles.getPropertyValue('--cor-secundaria-accent-dark').trim() || '#34d399',
-        // ... (restante das cores)
         '#f43f5e', '#facc15', '#818cf8', '#a78bfa', '#f472b6', '#60a5fa'
     ];
     const corLinhaTendencia: string = chartDatasetColorsDark[0];
     const corAreaTendencia: string = `${corLinhaTendencia}4D`;
 
-    // 4. TYPE ASSERTIONS para elementos do DOM
     const kpiTotalVendasEl = document.getElementById('kpi-total-vendas') as HTMLElement | null;
     const kpiNumTransacoesEl = document.getElementById('kpi-num-transacoes') as HTMLElement | null;
     const kpiTicketMedioEl = document.getElementById('kpi-ticket-medio') as HTMLElement | null;
     const ctxCategoriaCanvas = document.getElementById('grafico-vendas-categoria') as HTMLCanvasElement | null;
     const ctxTendenciaCanvas = document.getElementById('grafico-tendencia-vendas') as HTMLCanvasElement | null;
     const corpoTabelaVendas = document.getElementById('corpo-tabela-vendas') as HTMLTableSectionElement | null;
-    const cabecalhoTabelaVendasEl = document.getElementById('cabecalho-tabela') as HTMLTableRowElement | null; // Ou HTMLTableSectionElement se for <thead>
+    const cabecalhoTabelaVendasEl = document.getElementById('cabecalho-tabela') as HTMLTableRowElement | null; 
     const filtroGeralInputVendas = document.getElementById('filtro-geral') as HTMLInputElement | null;
     const loadingMessageDivVendas = document.getElementById('loading-message') as HTMLDivElement | null;
     const errorMessageDivVendas = document.getElementById('error-message') as HTMLDivElement | null;
@@ -76,10 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let dadosCompletosVendas: LinhaPlanilhaVendas[] = [];
     let colunasDefinidasCSVVendas: string[] = [];
 
+    // --- Restante das declarações de variáveis e lógicas de sidebar/navegação (mantidas como antes) ---
     const sidebarVendas = document.querySelector('.dashboard-sidebar') as HTMLElement | null;
     const menuToggleBtnVendas = document.querySelector('.menu-toggle-btn') as HTMLButtonElement | null;
     const bodyVendas = document.body;
-    const navLinksVendas = document.querySelectorAll<HTMLAnchorElement>('.sidebar-nav a'); // Tipo específico para o link
+    const navLinksVendas = document.querySelectorAll<HTMLAnchorElement>('.sidebar-nav a'); 
     const sectionsVendas = document.querySelectorAll<HTMLElement>('.dashboard-page-content > .dashboard-section');
     const tituloSecaoHeaderVendas = document.getElementById('dashboard-titulo-secao') as HTMLElement | null;
 
@@ -90,9 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
             bodyVendas.classList.toggle('sidebar-overlay-active', isVisible);
             menuToggleBtnVendas.setAttribute('aria-expanded', isVisible.toString());
         });
-        bodyVendas.addEventListener('click', (event: MouseEvent) => { // Tipar o evento
+        bodyVendas.addEventListener('click', (event: MouseEvent) => { 
             if (bodyVendas.classList.contains('sidebar-overlay-active') && sidebarVendas.classList.contains('sidebar-visible')) {
-                const target = event.target as Node; // Type assertion para event.target
+                const target = event.target as Node; 
                 if (!sidebarVendas.contains(target) && !menuToggleBtnVendas.contains(target)) {
                     console.log("Vendas.ts: Clique fora da sidebar, fechando sidebar.");
                     sidebarVendas.classList.remove('sidebar-visible');
@@ -103,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. TIPOS EXPLÍCITOS para parâmetros de função
     function updateActiveLinkAndTitleVendas(activeLink: HTMLAnchorElement | null): void {
         console.log("Vendas.ts: updateActiveLinkAndTitleVendas chamado com link:", activeLink ? activeLink.href : 'null');
         navLinksVendas.forEach(navLink => navLink.classList.remove('active'));
@@ -139,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
 
-        sectionsVendas.forEach(section => { // section já é HTMLElement aqui
+        sectionsVendas.forEach(section => { 
             if (section.id === targetId) {
                 section.style.display = 'block';
                 section.classList.add('active-section');
@@ -182,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     navLinksVendas.forEach(link => {
-        // 6. TIPAGEM DO 'this' em event handlers
         link.addEventListener('click', function(this: HTMLAnchorElement, event: MouseEvent) {
             const currentAnchor = this; 
             const hrefAttribute = currentAnchor.getAttribute('href');
@@ -371,7 +358,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let numValor: number = typeof valor === 'string' 
             ? parseFloat(valor.replace(/[R$. ]/g, '').replace(',', '.')) 
             : Number(valor);
-        if (typeof numValor !== 'number' || isNaN(numValor)) {
+
+        if (typeof numValor !== 'number' || isNaN(numValor) || Math.abs(numValor) < 0.005) { 
             return 'R$ 0,00';
         }
         return numValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -388,8 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const clearCanvasMessage = (canvas: HTMLCanvasElement | null) => {
             if (canvas && canvas.parentElement) {
-                const pMessage = canvas.parentElement.querySelector('p');
-                if (pMessage) pMessage.remove();
+                const existingMessages = canvas.parentElement.querySelectorAll('.chart-message, .chart-reload-message'); // Inclui possível classe da mensagem de recarregar
+                existingMessages.forEach(msg => msg.remove());
             }
         };
         clearCanvasMessage(ctxCategoriaCanvas);
@@ -397,13 +385,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (dados.length === 0) {
             console.log("DEBUG VENDAS (TS calcularKPIs): Sem dados, gráficos não renderizados.");
+            const createMessageElement = (text: string) => {
+                const p = document.createElement('p');
+                p.textContent = text;
+                p.className = 'chart-message'; 
+                p.style.textAlign = 'center';
+                p.style.padding = '20px';
+                p.style.color = corTextoSecundarioDark;
+                return p;
+            };
              if (ctxCategoriaCanvas && ctxCategoriaCanvas.parentElement) {
-                const p = document.createElement('p'); p.textContent = 'Sem dados de categoria.'; /* add styles */
-                ctxCategoriaCanvas.parentElement.appendChild(p);
+                ctxCategoriaCanvas.parentElement.appendChild(createMessageElement('Sem dados de categoria.'));
             }
             if (ctxTendenciaCanvas && ctxTendenciaCanvas.parentElement) {
-                const p = document.createElement('p'); p.textContent = 'Sem dados de tendência.'; /* add styles */
-                ctxTendenciaCanvas.parentElement.appendChild(p);
+                 ctxTendenciaCanvas.parentElement.appendChild(createMessageElement('Sem dados de tendência.'));
             }
             return;
         }
@@ -413,13 +408,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const vendasPorMes: { [mesAno: string]: { total: number, ano: number, mes: number } } = {};
     
         dados.forEach((item: LinhaPlanilhaVendas) => {
-            const valorVendaStr = String(item[NOME_COLUNA_VALOR_VENDA_VENDAS] || '0').replace(/[R$. ]/g, '').replace(',', '.');
+            const valorVendaOriginal = String(item[NOME_COLUNA_VALOR_VENDA_VENDAS] || '0');
+            const valorVendaStr = valorVendaOriginal.replace(/[R$. ]/g, '').replace(',', '.');
             const valorVendaNum = parseFloat(valorVendaStr);
+    
+            console.log(`Item Processado: Original='${valorVendaOriginal}', Limpo='${valorVendaStr}', Num='${valorVendaNum}', Cat='${String(item[NOME_COLUNA_CATEGORIA_VENDAS] || 'Outros')}'`);
     
             if (!isNaN(valorVendaNum)) {
                 totalVendasNumerico += valorVendaNum;
-                const categoria: string = String(item[NOME_COLUNA_CATEGORIA_VENDAS] || 'Outros').trim();
-                vendasPorCategoria[categoria] = (vendasPorCategoria[categoria] || 0) + valorVendaNum;
+                
+                // Padroniza a categoria para "Outros" se for "undefined", vazia, ou "outros" (case-insensitive)
+                let categoriaOriginalNome: string = String(item[NOME_COLUNA_CATEGORIA_VENDAS] || '').trim();
+                let categoriaFinal: string;
+
+                if (categoriaOriginalNome.toLowerCase() === 'undefined' || categoriaOriginalNome === '' || categoriaOriginalNome.toLowerCase() === 'outros') {
+                    categoriaFinal = 'Outros'; // Padroniza para "Outros" com 'O' maiúsculo
+                } else {
+                    // Você pode adicionar outras normalizações aqui se precisar, ex: capitalizar outras categorias
+                    // categoriaFinal = categoriaOriginalNome.charAt(0).toUpperCase() + categoriaOriginalNome.slice(1).toLowerCase();
+                    categoriaFinal = categoriaOriginalNome; // Mantém o nome original para outras categorias
+                }
+                vendasPorCategoria[categoriaFinal] = (vendasPorCategoria[categoriaFinal] || 0) + valorVendaNum;
     
                 const dataStr: string = String(item[NOME_COLUNA_DATA_VENDAS] || '').trim();
                 if (dataStr) {
@@ -442,6 +451,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         vendasPorMes[chaveMesAno].total += valorVendaNum;
                     }
                 }
+            } else { 
+                console.warn(`AVISO VENDAS (TS calcularKPIs ITEM): Valor não numérico. Original='${valorVendaOriginal}', Limpo='${valorVendaStr}', Resultado parseFloat='${valorVendaNum}'`);
             }
         });
     
@@ -451,16 +462,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (kpiTotalVendasEl) kpiTotalVendasEl.textContent = formatarMoedaVendas(totalVendasNumerico);
         if (kpiNumTransacoesEl) kpiNumTransacoesEl.textContent = numTransacoes.toString();
         if (kpiTicketMedioEl) kpiTicketMedioEl.textContent = formatarMoedaVendas(ticketMedio);
-        console.log("DEBUG VENDAS (TS calcularKPIs): KPIs atualizados.");
+        console.log("DEBUG VENDAS (TS calcularKPIs): KPIs atualizados. Total Vendas Numerico:", totalVendasNumerico);
 
+        // Gráfico de Categorias como PIZZA
         if (ctxCategoriaCanvas) { 
             const ctx = ctxCategoriaCanvas.getContext('2d');
             if (ctx) {
-                graficoCategoriaInstanceVendas = new Chart(ctx, { // Chart é 'any' aqui devido ao declare
-                    type: 'bar', 
+                graficoCategoriaInstanceVendas = new Chart(ctx, {
+                    type: 'pie', // ALTERADO PARA PIZZA
                     data: {
                         labels: Object.keys(vendasPorCategoria),
                         datasets: [{
+                            label: 'Vendas por Categoria', // Adicionado um label para o dataset
                             data: Object.values(vendasPorCategoria),
                             backgroundColor: chartDatasetColorsDark,
                             borderColor: corFundoCardsDark, 
@@ -468,43 +481,47 @@ document.addEventListener('DOMContentLoaded', () => {
                         }]
                     },
                     options: {
-                        indexAxis: 'y', 
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: {
-                            x: { 
-                                beginAtZero: true,
-                                ticks: { color: corTextoSecundarioDark, callback: (value: number | string) => formatarMoedaVendas(value) },
-                                grid: { color: corBordasDark, drawBorder: false }
-                            },
-                            y: { ticks: { color: corTextoSecundarioDark, autoSkip: false }, grid: { display: false } }
-                        },
                         plugins: {
-                            legend: { display: false },
+                            legend: { 
+                                position: 'bottom', // Legenda embaixo para pizza também pode ser bom
+                                labels: {
+                                    color: corTextoSecundarioDark,
+                                    padding: 15,
+                                    font: { size: 11 }
+                                }
+                            },
                             tooltip: {
                                 bodyColor: corTextoPrincipalDark, titleColor: corTextoPrincipalDark,
                                 backgroundColor: corFundoCardsDark, borderColor: corBordasDark, borderWidth: 1, padding: 10,
                                 callbacks: { 
-                                    label: (context: any) => { // Tipar context se tiver @types/chart.js
-                                        const label = context.chart.data.labels[context.dataIndex] || '';
+                                    label: (context: any) => {
+                                        const label = context.label || ''; // Usar context.label para pie/doughnut
                                         const value = context.raw;
-                                        return `${label}: ${formatarMoedaVendas(value as number)}`;
+                                        const percentage = context.chart.getDataVisibility(context.dataIndex) ? (context.raw / context.chart.getDatasetMeta(0).total * 100).toFixed(2) + '%' : '';
+                                        return `${label}: ${formatarMoedaVendas(value as number)} (${percentage})`;
                                     }
                                 }
                             },
                             datalabels: (typeof ChartDataLabels !== 'undefined' && ChartDataLabels) ? {
-                                anchor: 'end', align: 'right', offset: 4, clamp: true, color: corTextoSecundarioDark,
-                                font: { size: 10 },
-                                formatter: (value: number, context: any) => context.chart.data.labels[context.dataIndex]
+                                color: corTextoPrincipalDark,
+                                font: { weight: 'bold', size: 10 },
+                                formatter: (value: number, context: any) => {
+                                    const percentage = (value / context.chart.getDatasetMeta(0).total * 100);
+                                    return percentage > 5 ? percentage.toFixed(0) + '%' : ''; // Mostrar % se for > 5%
+                                },
+                                anchor: 'center',
+                                align: 'center'
                             } : { display: false }
-                        },
-                        layout: { padding: { right: 40 } }
+                        }
                     }
                 });
-                console.log("DEBUG VENDAS (TS calcularKPIs): Gráfico de categorias renderizado.");
+                console.log("DEBUG VENDAS (TS calcularKPIs): Gráfico de categorias (PIZZA) renderizado.");
             }
         }
 
+        // Gráfico de Tendência (legenda já ajustada)
         if (ctxTendenciaCanvas) { 
             const ctx = ctxTendenciaCanvas.getContext('2d');
             if (ctx) {
@@ -515,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const valoresGrafico: number[] = chavesOrdenadas.map(chave => vendasPorMes[chave].total);
 
-                graficoTendenciaInstanceVendas = new Chart(ctx, { // Chart é 'any'
+                graficoTendenciaInstanceVendas = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labelsGrafico,
@@ -535,7 +552,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             x: { ticks: { color: corTextoSecundarioDark, maxRotation: 0, autoSkipPadding: 20 }, grid: { color: corBordasDark, display: false } }
                         },
                         plugins: {
-                            legend: { display: true, position: 'top', align: 'center', labels: { color: corTextoSecundarioDark, padding: 15, font: {size: 11}, boxWidth: 12, usePointStyle: true } },
+                            legend: { 
+                                display: true, 
+                                position: 'bottom', 
+                                align: 'center', 
+                                labels: { color: corTextoSecundarioDark, padding: 15, font: {size: 11}, boxWidth: 12, usePointStyle: true } 
+                            },
                             tooltip: {
                                 bodyColor: corTextoPrincipalDark, titleColor: corTextoPrincipalDark,
                                 backgroundColor: corFundoCardsDark, borderColor: corBordasDark, borderWidth: 1, padding: 10,
@@ -548,10 +570,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log("DEBUG VENDAS (TS calcularKPIs): Gráfico de tendência renderizado.");
             }
         }
-    };
+    }; 
 
     const renderizarTabelaVendas = (dadosParaRenderizar: LinhaPlanilhaVendas[]): void => {
-        if (!corpoTabelaVendas || !cabecalhoTabelaVendasEl) {
+        // ... (código da tabela permanece o mesmo) ...
+         if (!corpoTabelaVendas || !cabecalhoTabelaVendasEl) {
             console.error("Vendas.ts: Elementos da tabela não encontrados.");
             return;
         }
@@ -604,6 +627,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const filtrarLinhaVendas = (linha: LinhaPlanilhaVendas, termoBusca: string): boolean => {
+        // ... (código permanece o mesmo) ...
         if (!termoBusca) return true;
         const termoLower = termoBusca.toLowerCase();
         return colunasDefinidasCSVVendas.some(cabecalho => 
@@ -645,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("DEBUG VENDAS (TS carregarDadosVendas): Chamando handlePageLoad APÓS DADOS.");
             handlePageLoadAndNavigationVendas(); 
 
-        } catch (erro) { // 7. TRATAMENTO DE ERRO 'unknown'
+        } catch (erro) { 
             console.error("DEBUG VENDAS (TS carregarDadosVendas): ERRO CRÍTICO:", erro);
             const mensagemErro = (erro instanceof Error) ? erro.message : 'Erro desconhecido ao carregar dados.';
             mostrarMensagemVendas(errorMessageDivVendas, `Erro ao carregar dados: ${mensagemErro}.`);
@@ -658,8 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (filtroGeralInputVendas) {
-        filtroGeralInputVendas.addEventListener('input', (e: Event) => { // Tipar o evento
-            const target = e.target as HTMLInputElement; // Type assertion para target
+        filtroGeralInputVendas.addEventListener('input', (e: Event) => { 
+            const target = e.target as HTMLInputElement; 
             const termoBusca = target.value.trim();
             const dashboardSection = document.getElementById('secao-dashboard');
             if (dashboardSection && (dashboardSection.style.display === 'block' || dashboardSection.classList.contains('active-section'))) {
@@ -674,7 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabelaContainers = document.querySelectorAll<HTMLDivElement>('.tabela-responsiva-container');
     tabelaContainers.forEach(container => { 
         function updateScrollShadows() {
-            if (!container) return; // container já é HTMLDivElement aqui
+            if (!container) return; 
             const maxScrollLeft = container.scrollWidth - container.clientWidth;
             container.classList.toggle('is-scrolling-left', container.scrollLeft > 1);
             container.classList.toggle('is-scrolling-right', container.scrollLeft < maxScrollLeft - 1);

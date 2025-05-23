@@ -10,9 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 console.log("LOG INICIAL: js/vendas.ts foi lido e está sendo processado.");
-// A linha "import ChartDataLabels from '...esm.js';" FOI REMOVIDA.
-// O plugin deve ser carregado globalmente via <script> no HTML.
-// Registra o plugin datalabels com Chart.js
 if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined' && ChartDataLabels) {
     Chart.register(ChartDataLabels);
     console.log("DEBUG VENDAS (TS): chartjs-plugin-datalabels (global) e tentativa de registro feita.");
@@ -20,16 +17,14 @@ if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined' && Ch
 else {
     console.error("ERRO VENDAS (TS): Chart ou ChartDataLabels (global) não está definido. O plugin datalabels PODE NÃO FUNCIONAR. Verifique inclusões no HTML.");
 }
-// URL DA SUA PLANILHA PUBLICADA COMO CSV PARA VENDAS
 const URL_PLANILHA_CSV_VENDAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfu_bkc8cu1dNbItO9zktGmn4JjNjQEoLAzGcG9rZDyfDyDp4ISEqpPKzIFTWFrMNVIz05V3NTpGT/pub?output=csv';
-// 3. TIPOS EXPLÍCITOS para instâncias de gráficos
 let graficoCategoriaInstanceVendas = null;
 let graficoTendenciaInstanceVendas = null;
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DEBUG VENDAS (TS): DOMContentLoaded INICIADO.");
     if (sessionStorage.getItem('isXuxuGlowAdminLoggedIn') !== 'true') {
         console.warn("DOM Vendas (TS): Usuário não logado. Redirecionando.");
-        window.location.href = 'index.html'; // Ou sua página de login
+        window.location.href = 'index.html';
         return;
     }
     console.log("DOM Vendas (TS): Usuário logado.");
@@ -44,29 +39,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const chartDatasetColorsDark = [
         computedStyles.getPropertyValue('--cor-primaria-accent-dark').trim() || '#8B5CF6',
         computedStyles.getPropertyValue('--cor-secundaria-accent-dark').trim() || '#34d399',
-        // ... (restante das cores)
         '#f43f5e', '#facc15', '#818cf8', '#a78bfa', '#f472b6', '#60a5fa'
     ];
     const corLinhaTendencia = chartDatasetColorsDark[0];
     const corAreaTendencia = `${corLinhaTendencia}4D`;
-    // 4. TYPE ASSERTIONS para elementos do DOM
     const kpiTotalVendasEl = document.getElementById('kpi-total-vendas');
     const kpiNumTransacoesEl = document.getElementById('kpi-num-transacoes');
     const kpiTicketMedioEl = document.getElementById('kpi-ticket-medio');
     const ctxCategoriaCanvas = document.getElementById('grafico-vendas-categoria');
     const ctxTendenciaCanvas = document.getElementById('grafico-tendencia-vendas');
     const corpoTabelaVendas = document.getElementById('corpo-tabela-vendas');
-    const cabecalhoTabelaVendasEl = document.getElementById('cabecalho-tabela'); // Ou HTMLTableSectionElement se for <thead>
+    const cabecalhoTabelaVendasEl = document.getElementById('cabecalho-tabela');
     const filtroGeralInputVendas = document.getElementById('filtro-geral');
     const loadingMessageDivVendas = document.getElementById('loading-message');
     const errorMessageDivVendas = document.getElementById('error-message');
     const noDataMessageDivVendas = document.getElementById('no-data-message');
     let dadosCompletosVendas = [];
     let colunasDefinidasCSVVendas = [];
+    // --- Restante das declarações de variáveis e lógicas de sidebar/navegação (mantidas como antes) ---
     const sidebarVendas = document.querySelector('.dashboard-sidebar');
     const menuToggleBtnVendas = document.querySelector('.menu-toggle-btn');
     const bodyVendas = document.body;
-    const navLinksVendas = document.querySelectorAll('.sidebar-nav a'); // Tipo específico para o link
+    const navLinksVendas = document.querySelectorAll('.sidebar-nav a');
     const sectionsVendas = document.querySelectorAll('.dashboard-page-content > .dashboard-section');
     const tituloSecaoHeaderVendas = document.getElementById('dashboard-titulo-secao');
     if (sidebarVendas && menuToggleBtnVendas) {
@@ -78,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         bodyVendas.addEventListener('click', (event) => {
             if (bodyVendas.classList.contains('sidebar-overlay-active') && sidebarVendas.classList.contains('sidebar-visible')) {
-                const target = event.target; // Type assertion para event.target
+                const target = event.target;
                 if (!sidebarVendas.contains(target) && !menuToggleBtnVendas.contains(target)) {
                     console.log("Vendas.ts: Clique fora da sidebar, fechando sidebar.");
                     sidebarVendas.classList.remove('sidebar-visible');
@@ -88,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    // 5. TIPOS EXPLÍCITOS para parâmetros de função
     function updateActiveLinkAndTitleVendas(activeLink) {
         console.log("Vendas.ts: updateActiveLinkAndTitleVendas chamado com link:", activeLink ? activeLink.href : 'null');
         navLinksVendas.forEach(navLink => navLink.classList.remove('active'));
@@ -174,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return sectionFoundAndDisplayed;
     }
     navLinksVendas.forEach(link => {
-        // 6. TIPAGEM DO 'this' em event handlers
         link.addEventListener('click', function (event) {
             const currentAnchor = this;
             const hrefAttribute = currentAnchor.getAttribute('href');
@@ -360,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let numValor = typeof valor === 'string'
             ? parseFloat(valor.replace(/[R$. ]/g, '').replace(',', '.'))
             : Number(valor);
-        if (typeof numValor !== 'number' || isNaN(numValor)) {
+        if (typeof numValor !== 'number' || isNaN(numValor) || Math.abs(numValor) < 0.005) {
             return 'R$ 0,00';
         }
         return numValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -383,24 +375,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const clearCanvasMessage = (canvas) => {
             if (canvas && canvas.parentElement) {
-                const pMessage = canvas.parentElement.querySelector('p');
-                if (pMessage)
-                    pMessage.remove();
+                const existingMessages = canvas.parentElement.querySelectorAll('.chart-message, .chart-reload-message'); // Inclui possível classe da mensagem de recarregar
+                existingMessages.forEach(msg => msg.remove());
             }
         };
         clearCanvasMessage(ctxCategoriaCanvas);
         clearCanvasMessage(ctxTendenciaCanvas);
         if (dados.length === 0) {
             console.log("DEBUG VENDAS (TS calcularKPIs): Sem dados, gráficos não renderizados.");
-            if (ctxCategoriaCanvas && ctxCategoriaCanvas.parentElement) {
+            const createMessageElement = (text) => {
                 const p = document.createElement('p');
-                p.textContent = 'Sem dados de categoria.'; /* add styles */
-                ctxCategoriaCanvas.parentElement.appendChild(p);
+                p.textContent = text;
+                p.className = 'chart-message';
+                p.style.textAlign = 'center';
+                p.style.padding = '20px';
+                p.style.color = corTextoSecundarioDark;
+                return p;
+            };
+            if (ctxCategoriaCanvas && ctxCategoriaCanvas.parentElement) {
+                ctxCategoriaCanvas.parentElement.appendChild(createMessageElement('Sem dados de categoria.'));
             }
             if (ctxTendenciaCanvas && ctxTendenciaCanvas.parentElement) {
-                const p = document.createElement('p');
-                p.textContent = 'Sem dados de tendência.'; /* add styles */
-                ctxTendenciaCanvas.parentElement.appendChild(p);
+                ctxTendenciaCanvas.parentElement.appendChild(createMessageElement('Sem dados de tendência.'));
             }
             return;
         }
@@ -408,12 +404,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const vendasPorCategoria = {};
         const vendasPorMes = {};
         dados.forEach((item) => {
-            const valorVendaStr = String(item[NOME_COLUNA_VALOR_VENDA_VENDAS] || '0').replace(/[R$. ]/g, '').replace(',', '.');
+            const valorVendaOriginal = String(item[NOME_COLUNA_VALOR_VENDA_VENDAS] || '0');
+            const valorVendaStr = valorVendaOriginal.replace(/[R$. ]/g, '').replace(',', '.');
             const valorVendaNum = parseFloat(valorVendaStr);
+            console.log(`Item Processado: Original='${valorVendaOriginal}', Limpo='${valorVendaStr}', Num='${valorVendaNum}', Cat='${String(item[NOME_COLUNA_CATEGORIA_VENDAS] || 'Outros')}'`);
             if (!isNaN(valorVendaNum)) {
                 totalVendasNumerico += valorVendaNum;
-                const categoria = String(item[NOME_COLUNA_CATEGORIA_VENDAS] || 'Outros').trim();
-                vendasPorCategoria[categoria] = (vendasPorCategoria[categoria] || 0) + valorVendaNum;
+                // Padroniza a categoria para "Outros" se for "undefined", vazia, ou "outros" (case-insensitive)
+                let categoriaOriginalNome = String(item[NOME_COLUNA_CATEGORIA_VENDAS] || '').trim();
+                let categoriaFinal;
+                if (categoriaOriginalNome.toLowerCase() === 'undefined' || categoriaOriginalNome === '' || categoriaOriginalNome.toLowerCase() === 'outros') {
+                    categoriaFinal = 'Outros'; // Padroniza para "Outros" com 'O' maiúsculo
+                }
+                else {
+                    // Você pode adicionar outras normalizações aqui se precisar, ex: capitalizar outras categorias
+                    // categoriaFinal = categoriaOriginalNome.charAt(0).toUpperCase() + categoriaOriginalNome.slice(1).toLowerCase();
+                    categoriaFinal = categoriaOriginalNome; // Mantém o nome original para outras categorias
+                }
+                vendasPorCategoria[categoriaFinal] = (vendasPorCategoria[categoriaFinal] || 0) + valorVendaNum;
                 const dataStr = String(item[NOME_COLUNA_DATA_VENDAS] || '').trim();
                 if (dataStr) {
                     let dataObj = null;
@@ -436,6 +444,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
+            else {
+                console.warn(`AVISO VENDAS (TS calcularKPIs ITEM): Valor não numérico. Original='${valorVendaOriginal}', Limpo='${valorVendaStr}', Resultado parseFloat='${valorVendaNum}'`);
+            }
         });
         const numTransacoes = dados.length;
         const ticketMedio = numTransacoes > 0 ? totalVendasNumerico / numTransacoes : 0;
@@ -445,15 +456,17 @@ document.addEventListener('DOMContentLoaded', () => {
             kpiNumTransacoesEl.textContent = numTransacoes.toString();
         if (kpiTicketMedioEl)
             kpiTicketMedioEl.textContent = formatarMoedaVendas(ticketMedio);
-        console.log("DEBUG VENDAS (TS calcularKPIs): KPIs atualizados.");
+        console.log("DEBUG VENDAS (TS calcularKPIs): KPIs atualizados. Total Vendas Numerico:", totalVendasNumerico);
+        // Gráfico de Categorias como PIZZA
         if (ctxCategoriaCanvas) {
             const ctx = ctxCategoriaCanvas.getContext('2d');
             if (ctx) {
                 graficoCategoriaInstanceVendas = new Chart(ctx, {
-                    type: 'bar',
+                    type: 'pie', // ALTERADO PARA PIZZA
                     data: {
                         labels: Object.keys(vendasPorCategoria),
                         datasets: [{
+                                label: 'Vendas por Categoria', // Adicionado um label para o dataset
                                 data: Object.values(vendasPorCategoria),
                                 backgroundColor: chartDatasetColorsDark,
                                 borderColor: corFundoCardsDark,
@@ -461,42 +474,46 @@ document.addEventListener('DOMContentLoaded', () => {
                             }]
                     },
                     options: {
-                        indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                ticks: { color: corTextoSecundarioDark, callback: (value) => formatarMoedaVendas(value) },
-                                grid: { color: corBordasDark, drawBorder: false }
-                            },
-                            y: { ticks: { color: corTextoSecundarioDark, autoSkip: false }, grid: { display: false } }
-                        },
                         plugins: {
-                            legend: { display: false },
+                            legend: {
+                                position: 'bottom', // Legenda embaixo para pizza também pode ser bom
+                                labels: {
+                                    color: corTextoSecundarioDark,
+                                    padding: 15,
+                                    font: { size: 11 }
+                                }
+                            },
                             tooltip: {
                                 bodyColor: corTextoPrincipalDark, titleColor: corTextoPrincipalDark,
                                 backgroundColor: corFundoCardsDark, borderColor: corBordasDark, borderWidth: 1, padding: 10,
                                 callbacks: {
                                     label: (context) => {
-                                        const label = context.chart.data.labels[context.dataIndex] || '';
+                                        const label = context.label || ''; // Usar context.label para pie/doughnut
                                         const value = context.raw;
-                                        return `${label}: ${formatarMoedaVendas(value)}`;
+                                        const percentage = context.chart.getDataVisibility(context.dataIndex) ? (context.raw / context.chart.getDatasetMeta(0).total * 100).toFixed(2) + '%' : '';
+                                        return `${label}: ${formatarMoedaVendas(value)} (${percentage})`;
                                     }
                                 }
                             },
                             datalabels: (typeof ChartDataLabels !== 'undefined' && ChartDataLabels) ? {
-                                anchor: 'end', align: 'right', offset: 4, clamp: true, color: corTextoSecundarioDark,
-                                font: { size: 10 },
-                                formatter: (value, context) => context.chart.data.labels[context.dataIndex]
+                                color: corTextoPrincipalDark,
+                                font: { weight: 'bold', size: 10 },
+                                formatter: (value, context) => {
+                                    const percentage = (value / context.chart.getDatasetMeta(0).total * 100);
+                                    return percentage > 5 ? percentage.toFixed(0) + '%' : ''; // Mostrar % se for > 5%
+                                },
+                                anchor: 'center',
+                                align: 'center'
                             } : { display: false }
-                        },
-                        layout: { padding: { right: 40 } }
+                        }
                     }
                 });
-                console.log("DEBUG VENDAS (TS calcularKPIs): Gráfico de categorias renderizado.");
+                console.log("DEBUG VENDAS (TS calcularKPIs): Gráfico de categorias (PIZZA) renderizado.");
             }
         }
+        // Gráfico de Tendência (legenda já ajustada)
         if (ctxTendenciaCanvas) {
             const ctx = ctxTendenciaCanvas.getContext('2d');
             if (ctx) {
@@ -526,7 +543,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             x: { ticks: { color: corTextoSecundarioDark, maxRotation: 0, autoSkipPadding: 20 }, grid: { color: corBordasDark, display: false } }
                         },
                         plugins: {
-                            legend: { display: true, position: 'top', align: 'center', labels: { color: corTextoSecundarioDark, padding: 15, font: { size: 11 }, boxWidth: 12, usePointStyle: true } },
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                align: 'center',
+                                labels: { color: corTextoSecundarioDark, padding: 15, font: { size: 11 }, boxWidth: 12, usePointStyle: true }
+                            },
                             tooltip: {
                                 bodyColor: corTextoPrincipalDark, titleColor: corTextoPrincipalDark,
                                 backgroundColor: corFundoCardsDark, borderColor: corBordasDark, borderWidth: 1, padding: 10,
@@ -541,6 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     const renderizarTabelaVendas = (dadosParaRenderizar) => {
+        // ... (código da tabela permanece o mesmo) ...
         if (!corpoTabelaVendas || !cabecalhoTabelaVendasEl) {
             console.error("Vendas.ts: Elementos da tabela não encontrados.");
             return;
@@ -593,6 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG VENDAS (TS renderizarTabela): Tabela renderizada.");
     };
     const filtrarLinhaVendas = (linha, termoBusca) => {
+        // ... (código permanece o mesmo) ...
         if (!termoBusca)
             return true;
         const termoLower = termoBusca.toLowerCase();
@@ -630,7 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("DEBUG VENDAS (TS carregarDadosVendas): Chamando handlePageLoad APÓS DADOS.");
             handlePageLoadAndNavigationVendas();
         }
-        catch (erro) { // 7. TRATAMENTO DE ERRO 'unknown'
+        catch (erro) {
             console.error("DEBUG VENDAS (TS carregarDadosVendas): ERRO CRÍTICO:", erro);
             const mensagemErro = (erro instanceof Error) ? erro.message : 'Erro desconhecido ao carregar dados.';
             mostrarMensagemVendas(errorMessageDivVendas, `Erro ao carregar dados: ${mensagemErro}.`);
@@ -643,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     if (filtroGeralInputVendas) {
         filtroGeralInputVendas.addEventListener('input', (e) => {
-            const target = e.target; // Type assertion para target
+            const target = e.target;
             const termoBusca = target.value.trim();
             const dashboardSection = document.getElementById('secao-dashboard');
             if (dashboardSection && (dashboardSection.style.display === 'block' || dashboardSection.classList.contains('active-section'))) {
@@ -657,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tabelaContainers.forEach(container => {
         function updateScrollShadows() {
             if (!container)
-                return; // container já é HTMLDivElement aqui
+                return;
             const maxScrollLeft = container.scrollWidth - container.clientWidth;
             container.classList.toggle('is-scrolling-left', container.scrollLeft > 1);
             container.classList.toggle('is-scrolling-right', container.scrollLeft < maxScrollLeft - 1);
