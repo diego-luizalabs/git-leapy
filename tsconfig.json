@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "module": "es6",
+    "moduleResolution": "node",
     "lib": ["es2017", "dom", "dom.iterable"],
     "outDir": "./js/dist",
     "rootDir": "./js",
@@ -12,6 +13,7 @@
     "sourceMap": true
   },
   "include": [
-    "js/**/*.ts"
+    "js/**/*.ts", // Sua linha existente
+    "types/**/*.d.ts" // <-- ADICIONE ESTA LINHA
   ]
 }

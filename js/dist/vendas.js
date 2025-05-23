@@ -8,19 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 console.log("LOG INICIAL: js/vendas.ts foi lido pelo navegador.");
-// ▼▼▼ ADICIONADO/MODIFICADO (SE USAR NPM/YARN) ▼▼▼
-import ChartDataLabels from 'chartjs-plugin-datalabels'; // Descomente se você instalou via npm
+// ▼▼▼ LEMBRE-SE DE AJUSTAR CONFORME COMO VOCÊ INCLUI O PLUGIN ▼▼▼
+// Se você instalou 'chartjs-plugin-datalabels' via npm/yarn:
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 // Registra o plugin datalabels com Chart.js
-// Se ChartDataLabels não estiver definido (ex: plugin carregado via <script>),
-// Chart.js pode já tê-lo registrado ou você pode precisar registrá-lo de outra forma
-// dependendo de como você carrega Chart.js e seus plugins.
-// Para carregamento via <script>, geralmente não é necessário o import e o Chart.register aqui se o plugin se auto-registra.
-// Mas se você importou, você DEVE registrar.
 if (typeof ChartDataLabels !== 'undefined') {
     Chart.register(ChartDataLabels);
 }
-// ▲▲▲ FIM DA ADIÇÃO/MODIFICAÇÃO ▲▲▲
-// URL DA SUA PLANILHA PUBLICADA COMO CSV PARA VENDAS
+// Se você carrega 'chartjs-plugin-datalabels' via <script> no HTML,
+// comente ou remova a linha 'import...' acima. A lógica de registro abaixo pode ajudar,
+// ou o plugin pode se auto-registrar.
+/*
+else if (typeof Chart !== 'undefined' && Chart.plugins && (Chart.plugins as any).ChartDataLabels) {
+    Chart.register((Chart.plugins as any).ChartDataLabels);
+}
+*/
+// ▲▲▲ FIM DO AJUSTE DO PLUGIN ▲▲▲
+// URL DA SUA PLANILHA PUBLICADA COMO CSV PARA VENDAS (JÁ ESTÁ CORRETO COM O SEU LINK)
 const URL_PLANILHA_CSV_VENDAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfu_bkc8cu1dNbItO9zktGmn4JjNjQEoLAzGcG9rZDyfDyDp4ISEqpPKzIFTWFrMNVIz05V3NTpGT/pub?output=csv';
 let graficoCategoriaInstanceVendas = null;
 let graficoTendenciaInstanceVendas = null;
@@ -435,18 +439,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (kpiTicketMedioEl)
             kpiTicketMedioEl.textContent = formatarMoedaVendas(ticketMedio);
         console.log("DEBUG VENDAS (calcularKPIs): KPIs atualizados.");
-        // ▼▼▼ GRÁFICO DE VENDAS POR CATEGORIA MODIFICADO ▼▼▼
+        // GRÁFICO DE VENDAS POR CATEGORIA (MODIFICADO PARA BARRAS HORIZONTAIS COM DATALABELS)
         if (ctxCategoriaCanvas) {
             const ctx = ctxCategoriaCanvas.getContext('2d');
             if (ctx) {
                 if (graficoCategoriaInstanceVendas)
                     graficoCategoriaInstanceVendas.destroy();
                 graficoCategoriaInstanceVendas = new Chart(ctx, {
-                    type: 'bar', // MUDADO para 'bar'
+                    type: 'bar',
                     data: {
                         labels: Object.keys(vendasPorCategoria),
                         datasets: [{
-                                // label: 'Vendas por Categoria', // Label do dataset pode ser omitido se usar datalabels
                                 data: Object.values(vendasPorCategoria),
                                 backgroundColor: chartDatasetColorsDark,
                                 borderColor: corFundoCardsDark,
@@ -454,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }]
                     },
                     options: {
-                        indexAxis: 'y', // Para barras horizontais
+                        indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
@@ -467,20 +470,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                 grid: { color: corBordasDark, drawBorder: false }
                             },
                             y: {
-                                ticks: { color: corTextoSecundarioDark, autoSkip: false }, // autoSkip: false para garantir que todos os rótulos sejam mostrados se couberem
+                                ticks: { color: corTextoSecundarioDark, autoSkip: false },
                                 grid: { display: false }
                             }
                         },
                         plugins: {
                             legend: {
-                                display: false // Legenda principal desabilitada, pois usaremos rótulos de dados
+                                display: false
                             },
                             tooltip: {
                                 bodyColor: corTextoPrincipalDark, titleColor: corTextoPrincipalDark,
                                 backgroundColor: corFundoCardsDark, borderColor: corBordasDark, borderWidth: 1, padding: 10,
                                 callbacks: {
                                     label: (context) => {
-                                        // Para o tooltip, mostrar a categoria e o valor formatado
                                         const label = context.chart.data.labels[context.dataIndex] || '';
                                         const value = context.raw;
                                         return `${label}: ${formatarMoedaVendas(value)}`;
@@ -488,26 +490,22 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             },
                             datalabels: {
-                                anchor: 'end', // Ancora o rótulo ao final da barra
-                                align: 'right', // Alinha o texto à direita da âncora (para barras horizontais, fora da barra)
-                                offset: 4, // Pequeno espaçamento da barra
-                                clamp: true, // IMPORTANTE: tenta manter o rótulo dentro da área do gráfico
+                                anchor: 'end',
+                                align: 'right',
+                                offset: 4,
+                                clamp: true,
                                 color: corTextoSecundarioDark,
                                 font: {
-                                    size: 10, // Ajuste o tamanho conforme necessário
-                                    // weight: 'bold' // opcional
+                                    size: 10,
                                 },
                                 formatter: (value, context) => {
-                                    // Retorna o nome da categoria (label do eixo Y)
                                     return context.chart.data.labels[context.dataIndex];
                                 }
                             }
                         },
-                        // Garante espaço para os rótulos não saírem do painel
                         layout: {
                             padding: {
-                                right: 40 // Adiciona um padding à direita do gráfico para dar espaço aos datalabels. Ajuste conforme necessário.
-                                // Se os seus rótulos de categoria ("Outros", etc.) forem muito longos, pode precisar de mais.
+                                right: 40
                             }
                         }
                     }
@@ -515,7 +513,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log("DEBUG VENDAS (calcularKPIs): Gráfico de categorias (BARRA HORIZONTAL) renderizado.");
             }
         }
-        // ▲▲▲ FIM DA MODIFICAÇÃO DO GRÁFICO DE CATEGORIAS ▲▲▲
         // Gráfico de Tendência de Vendas
         if (ctxTendenciaCanvas) {
             const ctx = ctxTendenciaCanvas.getContext('2d');
@@ -533,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: {
                         labels: labelsGrafico,
                         datasets: [{
-                                label: 'Tendência de Vendas Mensais', // Este é o label que aparece na legenda
+                                label: 'Tendência de Vendas Mensais',
                                 data: valoresGrafico,
                                 borderColor: corLinhaTendencia,
                                 backgroundColor: corAreaTendencia,
@@ -554,14 +551,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         plugins: {
                             legend: {
                                 display: true,
-                                position: 'top', // Padrão é 'top'. Pode ser 'bottom' para mais espaço vertical.
-                                align: 'center', // Padrão é 'center'. Pode ser 'start' ou 'end'.
+                                position: 'top',
+                                align: 'center',
                                 labels: {
                                     color: corTextoSecundarioDark,
-                                    padding: 15, // Espaçamento em volta da legenda
+                                    padding: 15,
                                     font: { size: 11 },
-                                    boxWidth: 12, // Largura da caixinha de cor
-                                    usePointStyle: true // Usa estilo de ponto para a legenda (bom para gráficos de linha)
+                                    boxWidth: 12,
+                                    usePointStyle: true
                                 }
                             },
                             tooltip: {
@@ -570,10 +567,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 callbacks: { label: (context) => `${context.dataset.label || 'Vendas'}: ${formatarMoedaVendas(context.raw)}` }
                             }
                         },
-                        // Adicionar um pouco de padding se a legenda no topo estiver muito colada
                         layout: {
                             padding: {
-                                top: 5 // Se a legenda for 'top', pode precisar de um pouco de espaço
+                                top: 5
                             }
                         }
                     }
@@ -640,7 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const carregarDadosVendas = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log("DEBUG VENDAS (carregarDadosVendas): INICIADO...");
         mostrarMensagemVendas(loadingMessageDivVendas, 'Carregando dados do dashboard...', true);
-        if (!URL_PLANILHA_CSV_Vendas || URL_PLANILHA_CSV_VENDAS.includes('https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfu_bkc8cu1dNbItO9zktGmn4JjNjQEoLAzGcG9rZDyfDyDp4ISEqpPKzIFTWFrMNVIz05V3NTpGT/pub?output=csv') || URL_PLANILHA_CSV_VENDAS.length < 50) {
+        // ▼▼▼ CORREÇÃO DE TYPO APLICADA AQUI ▼▼▼
+        if (!URL_PLANILHA_CSV_VENDAS || URL_PLANILHA_CSV_VENDAS.includes('COLE_AQUI') || URL_PLANILHA_CSV_VENDAS.length < 50) {
+            // ▲▲▲ FIM DA CORREÇÃO DE TYPO ▲▲▲
             mostrarMensagemVendas(errorMessageDivVendas, 'Erro: URL da planilha CSV de Vendas não configurada ou inválida.');
             colunasDefinidasCSVVendas = [];
             dadosCompletosVendas = [];
@@ -651,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
-            const resposta = yield fetch(URL_PLANILHA_CSV_VENDAS);
+            const resposta = yield fetch(URL_PLANILHA_CSV_VENDAS); // Uso correto da constante
             console.log("DEBUG VENDAS (carregarDadosVendas): Resposta fetch:", resposta.status, resposta.statusText);
             if (!resposta.ok) {
                 throw new Error(`Falha ao buscar CSV de Vendas: ${resposta.status} ${resposta.statusText}.`);
