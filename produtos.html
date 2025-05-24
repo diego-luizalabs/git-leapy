@@ -8,8 +8,136 @@
     <link rel="stylesheet" href="css/produtos.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+
+        :root {
+            --cor-gradiente-sutil-1: #1f1a29;
+            --cor-gradiente-sutil-2: #2b233f;
+            --cor-gradiente-sutil-3: #3a3153;
+            --cor-gradiente-sutil-4: #251e36;
+            --cor-gradiente-sutil-5: #1c1724;
+            --cor-texto-principal-dark: #e5e7eb;
+            --cor-texto-secundario-dark: #9ca3af;
+            --cor-fundo-cards-dark: #1f2937;
+            --cor-bordas-dark: #374151;
+            --cor-fundo-input-dark: #2d3748;
+            --cor-primaria-accent-dark: #8B5CF6;
+            --cor-texto-placeholder-dark: #6b7280;
+        }
+
+        @keyframes animatedPurpleGradient {
+            0% { background-position: 0% 50%; } 25% { background-position: 100% 25%; }
+            50% { background-position: 0% 100%; } 75% { background-position: 50% 0%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(-45deg, var(--cor-gradiente-sutil-1), var(--cor-gradiente-sutil-2), var(--cor-gradiente-sutil-3), var(--cor-gradiente-sutil-4), var(--cor-gradiente-sutil-5), var(--cor-gradiente-sutil-1));
+            background-size: 500% 500%;
+            animation: animatedPurpleGradient 80s ease infinite;
+            color: var(--cor-texto-principal-dark, #e5e7eb);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar-logo {
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; padding: 15px 10px; height: 60px; box-sizing: border-box;
+        }
+        .sidebar-logo .logo-text {
+            font-size: 1.8rem; font-weight: bold;
+            color: var(--cor-primaria-accent-dark, #8B5CF6); letter-spacing: 1px; line-height: 1;
+        }
+        .sidebar-logo .logo-text span { display: inline-block; }
+        
+        .dashboard-layout { display: flex; min-height: 100vh; }
+        
+        .dashboard-sidebar nav {
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        ul.sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; 
+        }
+
+        ul.sidebar-nav li.nav-item-bottom {
+            margin-top: auto; 
+            padding-top: 1rem; 
+            padding-bottom: 0; /* LI encosta no fundo do seu container (UL) */
+        }
+        
+        /* Ajuste específico para o padding do link 'Configurações' */
+        ul.sidebar-nav li.nav-item-bottom a {
+            /* Supondo que seus links tenham um padding vertical, ex: padding: 0.75rem 1rem; 
+               Vamos reduzir o padding-bottom do link para o texto ficar mais baixo.
+               Ajuste 0.25rem conforme o visual desejado. 
+               Se o texto e ícone parecerem desalinhados verticalmente, pode ser preciso
+               ajustar o padding-top deste 'a' também ou o line-height. */
+            padding-bottom: 0.5rem; /* Reduz o espaço abaixo do texto/ícone dentro do link */
+        }
+
+
+        .dashboard-main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; }
         .content-section { display: none; }
         .content-section.active { display: block; }
+
+        .filtros-produtos-toolbar {
+            display: flex; flex-wrap: wrap; gap: 0.75rem; 
+            align-items: center; margin-bottom: 1.5rem; 
+        }
+        .filtros-produtos-toolbar .form-input-filtro,
+        .filtros-produtos-toolbar .form-select-filtro {
+            flex-grow: 1; min-width: 180px; height: 40px; box-sizing: border-box;
+        }
+        .form-input-filtro, .form-select-filtro {
+            background-color: var(--cor-fundo-input-dark, #2d3748);
+            color: var(--cor-texto-principal-dark, #e5e7eb);
+            border: 1px solid var(--cor-bordas-dark, #374151);
+            border-radius: 6px; padding: 0.5rem 0.75rem; 
+            font-size: 0.9rem; line-height: 1.4;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-input-filtro::placeholder { color: var(--cor-texto-placeholder-dark, #6b7280); }
+        .form-select-filtro {
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            padding-right: 2.5rem; 
+            background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%239ca3af" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>');
+            background-repeat: no-repeat; background-position: right 0.75rem center;
+            background-size: 1em 1em; cursor: pointer;
+        }
+        .form-input-filtro:focus, .form-select-filtro:focus {
+            border-color: var(--cor-primaria-accent-dark, #8B5CF6);
+            outline: none; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25); 
+        }
+        .form-input-filtro:hover, .form-select-filtro:hover {
+             border-color: var(--cor-primaria-accent-dark, #8B5CF6);
+        }
+        .filtros-produtos-toolbar .btn-adicionar-produto {
+            flex-shrink: 0; height: 40px; padding: 0.5rem 1rem; 
+        }
+        @media (max-width: 991px) {
+            .filtros-produtos-toolbar .form-input-filtro,
+            .filtros-produtos-toolbar .form-select-filtro,
+            .filtros-produtos-toolbar .btn-adicionar-produto {
+                min-width: calc(50% - 0.5rem); flex-grow: 1;
+            }
+        }
+        @media (max-width: 600px) {
+            .filtros-produtos-toolbar .form-input-filtro,
+            .filtros-produtos-toolbar .form-select-filtro,
+            .filtros-produtos-toolbar .btn-adicionar-produto {
+                min-width: 100%; width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -17,7 +145,7 @@
         <aside class="dashboard-sidebar">
             <div class="sidebar-logo-container">
                 <a href="index.html" class="sidebar-logo" title="Página Inicial XuxuGlow">
-                    <img src="imagens/img.png" alt="Logo XuxuGlow" class="logo-imagem-sidebar">
+                    <span class="logo-text">Leapy</span>
                 </a>
             </div>
             <nav>
@@ -34,13 +162,7 @@
                             Produtos
                         </a>
                     </li>
-                    <li>
-                        <a href="#" data-external-page="dashboard.html#clientes" data-title="Clientes">
-                            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
-                            Clientes
-                        </a>
-                    </li>
-                    <li>
+                    <li class="nav-item-bottom">
                         <a href="#" data-external-page="dashboard.html#configuracoes" data-title="Configurações">
                             <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
                             Configurações
@@ -76,23 +198,12 @@
                             <input type="text" id="filtro-busca-produto" class="form-input-filtro" placeholder="Buscar por nome ou ID...">
                             <select id="filtro-categoria-produto" class="form-select-filtro">
                                 <option value="">Todas as Categorias</option>
-                                <option value="Vestidos">Vestidos</option>
-                                <option value="Calças">Calças</option>
-                                <option value="Blusas">Blusas</option>
-                                <option value="Saias">Saias</option>
-                                <option value="Acessorios">Acessórios</option>
-                                <option value="Calcados">Calçados</option>
-                                <option value="Casacos">Casacos</option>
-                                <option value="Outros">Outros</option>
+                                <option value="Vestidos">Vestidos</option><option value="Calças">Calças</option><option value="Blusas">Blusas</option><option value="Saias">Saias</option><option value="Acessorios">Acessórios</option><option value="Calcados">Calçados</option><option value="Casacos">Casacos</option><option value="Outros">Outros</option>
                             </select>
                             <select id="filtro-vendas-produto" class="form-select-filtro"> <option value="">Qualquer Volume de Vendas</option>
                                 <option value="alta-venda">Alta Venda</option> <option value="media-venda">Média Venda</option> <option value="baixa-venda">Baixa Venda</option> </select>
                             <select id="ordenar-produtos" class="form-select-filtro">
-                                <option value="nome-asc">Ordenar por Nome (A-Z)</option>
-                                <option value="nome-desc">Ordenar por Nome (Z-A)</option>
-                                <option value="preco-asc">Ordenar por Preço (Menor)</option>
-                                <option value="preco-desc">Ordenar por Preço (Maior)</option>
-                                <option value="vendas-asc">Ordenar por Vendas (Menor)</option> <option value="vendas-desc">Ordenar por Vendas (Maior)</option> <option value="id-asc">Ordenar por ID</option>
+                                <option value="nome-asc">Ordenar por Nome (A-Z)</option><option value="nome-desc">Ordenar por Nome (Z-A)</option><option value="preco-asc">Ordenar por Preço (Menor)</option><option value="preco-desc">Ordenar por Preço (Maior)</option><option value="vendas-asc">Ordenar por Vendas (Menor)</option> <option value="vendas-desc">Ordenar por Vendas (Maior)</option> <option value="id-asc">Ordenar por ID</option>
                             </select>
                             <button id="btn-abrir-modal-produto" class="btn btn-primario btn-adicionar-produto">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 8px; vertical-align: middle;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
@@ -108,54 +219,43 @@
         </div>
     </div>
 
-    <div id="modal-produto" class="modal-overlay">
+    <div id="modal-produto" class="modal-overlay" style="display:none;"> 
         <div class="modal-container">
-            <header class="modal-header">
-                <h3 id="modal-titulo-produto">Adicionar Novo Produto</h3>
-                <button class="modal-close-btn" aria-label="Fechar modal">&times;</button>
-            </header>
-            <div class="modal-body">
-                <form id="form-produto" novalidate>
-                    <input type="hidden" id="produto-id-modal">
-                    <div class="form-grupo">
-                        <label for="produto-nome-modal">Nome do Produto:</label>
-                        <input type="text" id="produto-nome-modal" name="produtoNome" required>
-                    </div>
-                    <div class="form-grupo">
-                        <label for="produto-categoria-modal">Categoria:</label>
-                        <select id="produto-categoria-modal" name="produtoCategoria" required>
-                            <option value="" disabled selected>Selecione uma categoria</option>
-                            <option value="Vestidos">Vestidos</option>
-                            <option value="Calças">Calças</option>
-                            <option value="Blusas">Blusas</option>
-                            <option value="Saias">Saias</option>
-                            <option value="Acessorios">Acessórios</option>
-                            <option value="Calcados">Calçados</option>
-                            <option value="Casacos">Casacos</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                    <div class="form-grupo">
-                        <label for="produto-preco-modal">Preço (R$):</label>
-                        <input type="number" id="produto-preco-modal" name="produtoPreco" step="0.01" min="0" required placeholder="ex: 199.90">
-                    </div>
-                    <div class="form-grupo">
-                        <label for="produto-vendas-modal">Vendas (Unidades):</label> <input type="number" id="produto-vendas-modal" name="produtoVendas" step="1" min="0" required placeholder="ex: 10"> </div>
-                    <div class="form-grupo">
-                        <label for="produto-descricao-modal">Descrição (Opcional):</label>
-                        <textarea id="produto-descricao-modal" name="produtoDescricao" rows="4"></textarea>
-                    </div>
-                </form>
-            </div>
-            <footer class="modal-footer">
-                <button type="button" id="btn-cancelar-modal-produto" class="btn btn-secundario">Cancelar</button>
-                <button type="submit" form="form-produto" class="btn btn-primario btn-salvar-produto">
-                    Salvar Produto
-                </button>
-            </footer>
+            <header class="modal-header"><h3 id="modal-titulo-produto">Adicionar Novo Produto</h3><button class="modal-close-btn" aria-label="Fechar modal">&times;</button></header>
+            <div class="modal-body"><form id="form-produto" novalidate><input type="hidden" id="produto-id-modal"><div class="form-grupo"><label for="produto-nome-modal">Nome do Produto:</label><input type="text" id="produto-nome-modal" name="produtoNome" required></div><div class="form-grupo"><label for="produto-categoria-modal">Categoria:</label><select id="produto-categoria-modal" name="produtoCategoria" required><option value="" disabled selected>Selecione uma categoria</option><option value="Vestidos">Vestidos</option><option value="Calças">Calças</option><option value="Blusas">Blusas</option><option value="Saias">Saias</option><option value="Acessorios">Acessórios</option><option value="Calcados">Calçados</option><option value="Casacos">Casacos</option><option value="Outros">Outros</option></select></div><div class="form-grupo"><label for="produto-preco-modal">Preço (R$):</label><input type="number" id="produto-preco-modal" name="produtoPreco" step="0.01" min="0" required placeholder="ex: 199.90"></div><div class="form-grupo"><label for="produto-vendas-modal">Vendas (Unidades):</label><input type="number" id="produto-vendas-modal" name="produtoVendas" step="1" min="0" required placeholder="ex: 10"></div><div class="form-grupo"><label for="produto-descricao-modal">Descrição (Opcional):</label><textarea id="produto-descricao-modal" name="produtoDescricao" rows="4"></textarea></div></form></div>
+            <footer class="modal-footer"><button type="button" id="btn-cancelar-modal-produto" class="btn btn-secundario">Cancelar</button><button type="submit" form="form-produto" class="btn btn-primario btn-salvar-produto">Salvar Produto</button></footer>
         </div>
     </div>
 
     <script src="js/dist/produtos.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoElement = document.querySelector('.sidebar-logo .logo-text');
+            if (logoElement) {
+                const originalText = logoElement.textContent.trim();
+                if (!originalText) return;
+                const letters = originalText.split('');
+                logoElement.innerHTML = ''; 
+                const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*&%$#@!?<>[]{}()/\\|';
+                const cyclesPerLetter = 8; const intervalTime = 120; const revealStagger = 250; 
+                letters.forEach((correctChar, index) => {
+                    const letterSpan = document.createElement('span');
+                    letterSpan.textContent = scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+                    logoElement.appendChild(letterSpan);
+                    setTimeout(() => {
+                        let currentCycle = 0;
+                        const scrambleIntervalId = setInterval(() => {
+                            letterSpan.textContent = scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+                            currentCycle++;
+                            if (currentCycle >= cyclesPerLetter) {
+                                clearInterval(scrambleIntervalId);
+                                letterSpan.textContent = correctChar; 
+                            }
+                        }, intervalTime);
+                    }, index * revealStagger);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
