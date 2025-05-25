@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Vendas</title> <link rel="stylesheet" href="css/vendas.css">
+    <title>Dashboard de Vendas</title>
+    <link rel="stylesheet" href="css/vendas.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
@@ -26,11 +27,13 @@
         }
 
         @keyframes animatedPurpleGradient {
-            0% { background-position: 0% 50%; } 25% { background-position: 100% 25%; }
-            50% { background-position: 0% 100%; } 75% { background-position: 50% 0%; }
+            0% { background-position: 0% 50%; } 
+            25% { background-position: 100% 25%; }
+            50% { background-position: 0% 100%; } 
+            75% { background-position: 50% 0%; }
             100% { background-position: 0% 50%; }
         }
-
+        
         body {
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -76,14 +79,10 @@
         }
         
         ul.sidebar-nav li.nav-item-bottom a {
-            padding-bottom: 0.25rem; /* Padding inferior mínimo para o link encostar em baixo */
-             /* Se os links tiverem um padding vertical geral, ex: padding: 10px 15px;
-               este padding-bottom vai sobrepor apenas a parte de baixo.
-               Ajuste padding-top aqui se o alinhamento vertical do ícone/texto ficar estranho.
-               Ex: padding-top: 10px; padding-bottom: 4px; */
+            padding-bottom: 0.25rem; 
         }
 
-        .dashboard-main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; }
+        .dashboard-main-content { flex-grow: 1; display: flex; flex-direction: column; height:100vh; overflow-y:hidden; background-color: transparent; }
         .dashboard-header-main{flex-shrink:0;}
         .dashboard-page-content{padding:1.5rem;flex-grow:1;overflow-y:auto;}
         .dashboard-section{display:none;}.dashboard-section.active-section{display:block;}
@@ -99,9 +98,26 @@
         .card-secao.secao-tabela-detalhada h3{margin-top:0;margin-bottom:1rem;flex-shrink:0;color:var(--cor-texto-principal-dark, #e5e7eb);}
         #filtro-geral{margin-bottom:1rem;padding:.75rem 1rem;width:100%;box-sizing:border-box;background-color:var(--cor-fundo-input-dark, #2d3748);color:var(--cor-texto-principal-dark, #e5e7eb);border:1px solid var(--cor-bordas-dark, #374151);border-radius:.375rem;font-size:.9rem;}
         #filtro-geral::placeholder{color:var(--cor-texto-placeholder-dark, #6b7280);}
-        .tabela-responsiva-container{overflow-x:auto;overflow-y:auto;max-height:500px;flex-grow:1;}
+        
+        .tabela-responsiva-container{
+            overflow-x: auto; 
+            flex-grow: 1; 
+        }
+
         .tabela-responsiva-container table{width:100%;border-collapse:collapse;font-size:.9rem;}
-        .tabela-responsiva-container thead th{background-color:var(--cor-fundo-th-dark, #374151);color:var(--cor-texto-principal-dark, #e5e7eb);font-weight:600;position:sticky;top:0;z-index:1;padding:.75rem;text-align:left;border-bottom:2px solid var(--cor-primaria-accent-dark, #8B5CF6);}
+                
+        .tabela-responsiva-container thead th {
+            background-color:var(--cor-fundo-th-dark, #374151);
+            color:var(--cor-texto-principal-dark, #e5e7eb);
+            font-weight:600;
+            position:sticky;
+            top:0;
+            z-index:1;
+            padding:.75rem;
+            text-align:left;
+            border-bottom: 2px solid var(--cor-primaria-accent-dark, #8B5CF6); /* Linha sólida restaurada */
+        }
+
         .tabela-responsiva-container tbody td{padding:.75rem;text-align:left;border-bottom:1px solid var(--cor-bordas-dark, #374151);color:var(--cor-texto-secundario-dark, #9ca3af);}
         .tabela-responsiva-container tbody tr:hover td{background-color:var(--cor-fundo-hover-linha-dark, #252f3e);color:var(--cor-texto-principal-dark, #e5e7eb);}.coluna-numero{text-align:right!important;}
         #loading-message,#error-message,#no-data-message{padding:20px;text-align:center;border-radius:.5rem;margin:1rem 0;display:none;align-items:center;justify-content:center;border:1px solid var(--cor-bordas-dark, #374151);background-color:var(--cor-fundo-cards-dark, #1f2937);}
@@ -132,7 +148,8 @@
                             Produtos
                         </a>
                     </li>
-                    <li class="nav-item-bottom"> <a href="#configuracoes" data-target="secao-configuracoes" data-title="Configurações">
+                    <li class="nav-item-bottom"> 
+                        <a href="#configuracoes" data-target="secao-configuracoes" data-title="Configurações">
                             <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
                             Configurações
                         </a>
@@ -145,7 +162,8 @@
             <header class="dashboard-header-main">
                 <div class="header-left">
                     <button class="menu-toggle-btn" aria-label="Abrir menu" aria-expanded="false">☰</button>
-                    <h2 id="dashboard-titulo-secao">Visão Geral das Vendas</h2> </div>
+                    <h2 id="dashboard-titulo-secao">Visão Geral das Vendas</h2> 
+                </div>
                 <div class="header-right">
                     <input type="search" placeholder="Buscar..." class="dashboard-search" aria-label="Buscar no dashboard"/>
                     <span class="user-profile" aria-label="Perfil do usuário">Olá, Diego!</span>
@@ -156,12 +174,12 @@
                 <div id="secao-dashboard" class="dashboard-section active-section"> 
                     <div class="kpi-cards-container">
                         <div class="kpi-card"><h4>Total de Vendas</h4><p id="kpi-total-vendas">R$ 0,00</p></div>
-                        <div class="kpi-card"><h4>Nº de Transações</h4><p id="kpi-num-transacoes">0</p></div>
+                        <div class="kpi-card"><h4>Nº de Produtos</h4><p id="kpi-num-transacoes">0</p></div>
                         <div class="kpi-card"><h4>Ticket Médio</h4><p id="kpi-ticket-medio">R$ 0,00</p></div>
                     </div>
                     <div class="graficos-container">
                         <div class="grafico-card"><h4>Tendência de Vendas</h4><canvas id="grafico-tendencia-vendas"></canvas></div>
-                        </div>
+                    </div>
                     <div class="card-secao secao-tabela-detalhada">
                         <h3>Detalhes das Vendas</h3>
                         <input type="text" id="filtro-geral" placeholder="Filtrar em todas as colunas...">
@@ -191,7 +209,8 @@
     </div> 
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/dist/vendas.js" defer></script> <script>
+    <script src="js/dist/vendas.js" defer></script> 
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             const logoElement = document.querySelector('.sidebar-logo .logo-text');
             if (logoElement) {

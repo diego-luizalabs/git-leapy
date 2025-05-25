@@ -29,7 +29,6 @@ catch (error) {
     console.error("ERRO VENDAS (TS): Falha ao tentar registrar ChartDataLabels:", error);
 }
 const URL_PLANILHA_CSV_VENDAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTc4Li4jKj5mCtp-LqMGZpZQ_YQftOHcYV-doFLokTgEcrRcsgR-N6GM7q4aPZid_lq6YKAJON_1IZO/pub?gid=896325874&single=true&output=csv';
-// let graficoCategoriaInstanceVendas: any = null; // REMOVIDO COMPLETAMENTE
 let graficoTendenciaInstanceVendas = null;
 let dadosCompletosVendas = [];
 let colunasDefinidasCSVVendas = [];
@@ -42,8 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     console.log("DOM Vendas (TS): Usuário logado.");
     const NOME_COLUNA_VALOR_VENDA = 'Total da Semana';
-    // const NOME_COLUNA_CATEGORIA: string = 'Categoria'; // REMOVIDO COMPLETAMENTE
-    const NOME_COLUNA_DATA = 'Data'; // Mantido, embora não usado ativamente nos gráficos atuais, pode ser útil para futuras expansões ou tabela.
+    const NOME_COLUNA_DATA = 'Data';
     const COL_S1 = 'Primeira Semana';
     const COL_S2 = 'Segunda Semana';
     const COL_S3 = 'Terceira Semana';
@@ -51,20 +49,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const computedStyles = getComputedStyle(document.documentElement);
     const corTextoPrincipalDark = computedStyles.getPropertyValue('--cor-texto-principal-dark').trim() || '#e5e7eb';
     const corTextoSecundarioDark = computedStyles.getPropertyValue('--cor-texto-secundario-dark').trim() || '#9ca3af';
-    // const corBordasDark: string = computedStyles.getPropertyValue('--cor-bordas-dark').trim() || '#374151'; // Não usado diretamente no TS
-    // const corFundoCardsDark: string = computedStyles.getPropertyValue('--cor-fundo-cards-dark').trim() || '#1f2937'; // Não usado diretamente no TS
     const chartDatasetColorsDark = [
         computedStyles.getPropertyValue('--cor-primaria-accent-dark').trim() || '#8B5CF6',
-        computedStyles.getPropertyValue('--cor-secundaria-accent-dark').trim() || '#34d399', // Pode ser usado futuramente
-        '#f43f5e', '#facc15', '#818cf8', '#a78bfa', '#f472b6', '#60a5fa',
+        computedStyles.getPropertyValue('--cor-secundaria-accent-dark').trim() || '#34d399',
+        '#ef4444',
+        '#facc15', '#818cf8', '#a78bfa', '#f472b6', '#60a5fa',
         '#f97316', '#14b8a6', '#ec4899', '#0ea5e9'
     ];
     const corLinhaTendencia = chartDatasetColorsDark[0];
-    const corAreaTendencia = `${corLinhaTendencia}4D`; // Ex: #8B5CF64D para transparência
+    const corAreaTendencia = `${corLinhaTendencia}4D`;
+    const corLinhaExemplo = chartDatasetColorsDark[2];
     const kpiTotalVendasEl = document.getElementById('kpi-total-vendas');
     const kpiNumTransacoesEl = document.getElementById('kpi-num-transacoes');
     const kpiTicketMedioEl = document.getElementById('kpi-ticket-medio');
-    // const ctxCategoriaCanvas = document.getElementById('grafico-vendas-categoria') as HTMLCanvasElement | null; // REMOVIDO COMPLETAMENTE
     const ctxTendenciaCanvas = document.getElementById('grafico-tendencia-vendas');
     const corpoTabelaVendas = document.getElementById('corpo-tabela-vendas');
     const cabecalhoTabelaVendasEl = document.getElementById('cabecalho-tabela');
@@ -72,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingMessageDivVendas = document.getElementById('loading-message');
     const errorMessageDivVendas = document.getElementById('error-message');
     const noDataMessageDivVendas = document.getElementById('no-data-message');
-    // --- SUA LÓGICA DE NAVEGAÇÃO E SIDEBAR (COMO VOCÊ FORNECEU) ---
     const sidebarVendas = document.querySelector('.dashboard-sidebar');
     const menuToggleBtnVendas = document.querySelector('.menu-toggle-btn');
     const bodyVendas = document.body;
@@ -102,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             activeLink.classList.add('active');
             if (tituloSecaoHeaderVendas) {
                 let titulo = activeLink.dataset.title || (activeLink.textContent || '').trim() || 'Dashboard';
-                if (!activeLink.dataset.title) { // Tenta limpar o texto do ícone se não houver data-title
+                if (!activeLink.dataset.title) {
                     const iconSpan = activeLink.querySelector('.icon');
                     if (iconSpan && iconSpan.textContent) {
                         titulo = titulo.replace(iconSpan.textContent.trim(), '').trim();
@@ -128,22 +124,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 sectionFoundAndDisplayed = true;
                 section.querySelectorAll('.kpi-card, .grafico-card, .card-secao, .secao-tabela-detalhada').forEach((card, index) => {
                     card.style.animation = 'none';
-                    void card.offsetWidth; // Reinicia animação
+                    void card.offsetWidth;
                     card.style.animation = `fadeInUp 0.5s ${index * 0.07}s ease-out forwards`;
                 });
-                // Lógica específica para a seção de dashboard de vendas
                 if (targetId === 'secao-dashboard') {
                     if (dadosCompletosVendas.length > 0) {
                         if (noDataMessageDivVendas)
                             noDataMessageDivVendas.style.display = 'none';
-                        calcularKPIsEVisualizacoesVendas(dadosCompletosVendas); // Recalcula e redesenha gráficos para esta seção
+                        calcularKPIsEVisualizacoesVendas(dadosCompletosVendas);
                         const termoFiltro = (filtroGeralInputVendas === null || filtroGeralInputVendas === void 0 ? void 0 : filtroGeralInputVendas.value.toLowerCase()) || '';
                         renderizarTabelaVendas(dadosCompletosVendas.filter(linha => filtrarLinhaVendas(linha, termoFiltro)));
                     }
                     else {
-                        // Se não há dados, limpa e mostra mensagem apropriada
                         renderizarTabelaVendas([]);
-                        calcularKPIsEVisualizacoesVendas([]); // Limpa gráficos
+                        calcularKPIsEVisualizacoesVendas([]);
                         if ((loadingMessageDivVendas === null || loadingMessageDivVendas === void 0 ? void 0 : loadingMessageDivVendas.style.display) !== 'flex' && (errorMessageDivVendas === null || errorMessageDivVendas === void 0 ? void 0 : errorMessageDivVendas.style.display) !== 'flex') {
                             if (noDataMessageDivVendas)
                                 mostrarGlobalMessageVendas(noDataMessageDivVendas, 'Nenhum dado de vendas para exibir no dashboard no momento.');
@@ -165,27 +159,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentAnchor = this;
             const hrefAttribute = currentAnchor.getAttribute('href');
             const dataTargetSection = currentAnchor.dataset.target;
-            // Ignora links externos ou para outras páginas .html
             if (hrefAttribute && hrefAttribute.includes('.html') && !hrefAttribute.startsWith('#')) {
                 return;
             }
             if (hrefAttribute && (hrefAttribute.startsWith('http://') || hrefAttribute.startsWith('https://') || hrefAttribute.startsWith('//'))) {
                 return;
             }
-            event.preventDefault(); // Previne navegação padrão para hashes
+            event.preventDefault();
             let sectionIdToDisplay = dataTargetSection ||
                 (hrefAttribute && hrefAttribute.startsWith('#') && hrefAttribute.length > 1 ? `secao-${hrefAttribute.substring(1)}` : 'secao-dashboard');
             if (hrefAttribute === '#dashboard')
-                sectionIdToDisplay = 'secao-dashboard'; // Garante que #dashboard sempre aponte para secao-dashboard
+                sectionIdToDisplay = 'secao-dashboard';
             if (showSectionVendas(sectionIdToDisplay)) {
                 updateActiveLinkAndTitleVendas(currentAnchor);
-                // Atualiza o hash na URL de forma mais limpa
                 const newHash = sectionIdToDisplay === 'secao-dashboard' ? '#dashboard' : (sectionIdToDisplay.startsWith('secao-') ? `#${sectionIdToDisplay.substring(6)}` : `#${sectionIdToDisplay}`);
-                if (window.location.hash !== newHash && newHash !== '#undefined' && newHash !== '#null') { // Evita hashes inválidos
+                if (window.location.hash !== newHash && newHash !== '#undefined' && newHash !== '#null') {
                     history.pushState({ section: sectionIdToDisplay }, "", newHash);
                 }
             }
-            // Lógica para fechar sidebar em mobile após clique
             if (sidebarVendas && sidebarVendas.classList.contains('sidebar-visible') && window.innerWidth < 992 && menuToggleBtnVendas) {
                 sidebarVendas.classList.remove('sidebar-visible');
                 bodyVendas.classList.remove('sidebar-overlay-active');
@@ -195,51 +186,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     function handlePageLoadAndNavigationVendas() {
         const currentPathFilename = window.location.pathname.split('/').pop() || 'index.html';
-        const hash = location.hash.substring(1); // Remove o '#'
+        const hash = location.hash.substring(1);
         let activeLinkElement = null;
-        let targetSectionIdFromLoad = 'secao-dashboard'; // Padrão
-        // Verifica se estamos em uma página que deve exibir seções do dashboard (ex: index.html, vendas.html, dashboard.html)
-        // Adapte os nomes de arquivo conforme sua estrutura
+        let targetSectionIdFromLoad = 'secao-dashboard';
         if (currentPathFilename.endsWith('index.html') || currentPathFilename.endsWith('vendas.html') || currentPathFilename.endsWith('dashboard.html') || currentPathFilename === "") {
             if (hash) {
                 activeLinkElement = document.querySelector(`.sidebar-nav a[href="#${hash}"]`);
                 targetSectionIdFromLoad = (activeLinkElement === null || activeLinkElement === void 0 ? void 0 : activeLinkElement.dataset.target) || `secao-${hash}`;
             }
-            else { // Sem hash, carrega a seção padrão do dashboard
+            else {
                 activeLinkElement = document.querySelector('.sidebar-nav a[href="#dashboard"], .sidebar-nav a[data-target="secao-dashboard"]');
                 targetSectionIdFromLoad = (activeLinkElement === null || activeLinkElement === void 0 ? void 0 : activeLinkElement.dataset.target) || 'secao-dashboard';
             }
         }
         else {
-            // Para outras páginas (ex: produtos.html), apenas marca o link ativo, não tenta mostrar seção
             activeLinkElement = document.querySelector(`.sidebar-nav a[href$="${currentPathFilename}"]`);
             if (activeLinkElement)
                 updateActiveLinkAndTitleVendas(activeLinkElement);
-            return; // Não continua para mostrar seção se for outra página
+            return;
         }
-        if (!showSectionVendas(targetSectionIdFromLoad)) { // Se a seção do hash não for encontrada
-            if (showSectionVendas('secao-dashboard')) { // Tenta mostrar a seção dashboard como fallback
+        if (!showSectionVendas(targetSectionIdFromLoad)) {
+            if (showSectionVendas('secao-dashboard')) {
                 activeLinkElement = document.querySelector('.sidebar-nav a[href="#dashboard"], .sidebar-nav a[data-target="secao-dashboard"]');
             }
         }
-        updateActiveLinkAndTitleVendas(activeLinkElement); // Atualiza o link ativo e o título da seção
+        updateActiveLinkAndTitleVendas(activeLinkElement);
     }
     window.addEventListener('popstate', () => handlePageLoadAndNavigationVendas());
-    // --- Fim da Sua Lógica de Navegação ---
     function mostrarGlobalMessageVendas(elemento, mensagem = '', mostrarSpinner = false) {
         const todasMensagensGlobais = [loadingMessageDivVendas, errorMessageDivVendas, noDataMessageDivVendas];
         todasMensagensGlobais.forEach(msgEl => { if (msgEl && msgEl !== elemento)
             msgEl.style.display = 'none'; });
         if (elemento) {
-            elemento.innerHTML = ''; // Limpa conteúdo anterior
+            elemento.innerHTML = '';
             if (mostrarSpinner) {
                 const spinner = document.createElement('div');
                 spinner.className = 'spinner';
                 elemento.appendChild(spinner);
             }
             if (mensagem)
-                elemento.appendChild(document.createTextNode(mostrarSpinner ? ' ' + mensagem : mensagem)); // Adiciona espaço se tiver spinner
-            elemento.style.display = 'flex'; // Usa flex para centralizar spinner e texto
+                elemento.appendChild(document.createTextNode(mostrarSpinner ? ' ' + mensagem : mensagem));
+            elemento.style.display = 'flex';
         }
     }
     function processarCSVVendas(textoCsv) {
@@ -247,66 +234,61 @@ document.addEventListener('DOMContentLoaded', () => {
         if (todasLinhasTexto.length === 0) {
             return { cabecalhos: [], linhas: [] };
         }
-        const cabecalhoLinha = todasLinhasTexto.shift(); // Remove e retorna a primeira linha (cabeçalho)
+        const cabecalhoLinha = todasLinhasTexto.shift();
         if (!cabecalhoLinha || cabecalhoLinha.trim() === '') {
             console.warn("processarCSVVendas: Cabeçalho vazio ou ausente.");
             return { cabecalhos: [], linhas: [] };
         }
-        const cabecalhos = cabecalhoLinha.split(',').map(h => h.trim().replace(/^"|"$/g, '')); // Limpa e remove aspas das bordas
-        colunasDefinidasCSVVendas = cabecalhos; // Armazena globalmente
+        const cabecalhos = cabecalhoLinha.split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        colunasDefinidasCSVVendas = cabecalhos;
         const linhasProcessadas = todasLinhasTexto
-            .filter(linhaTexto => linhaTexto.trim() !== '') // Ignora linhas completamente vazias
+            .filter(linhaTexto => linhaTexto.trim() !== '')
             .map((linhaTexto) => {
             const valores = [];
             let dentroDeAspas = false;
             let valorAtual = '';
             for (let i = 0; i < linhaTexto.length; i++) {
                 const char = linhaTexto[i];
-                if (char === '"') { // Aspas duplas
-                    if (dentroDeAspas && i + 1 < linhaTexto.length && linhaTexto[i + 1] === '"') { // Aspas duplas escapadas ("")
+                if (char === '"') {
+                    if (dentroDeAspas && i + 1 < linhaTexto.length && linhaTexto[i + 1] === '"') {
                         valorAtual += '"';
                         i++;
                         continue;
                     }
-                    dentroDeAspas = !dentroDeAspas; // Inverte o estado de estar dentro de aspas
+                    dentroDeAspas = !dentroDeAspas;
                 }
-                else if (char === ',' && !dentroDeAspas) { // Vírgula fora de aspas é um separador
+                else if (char === ',' && !dentroDeAspas) {
                     valores.push(valorAtual.trim());
                     valorAtual = '';
                 }
                 else {
                     valorAtual += char;
-                } // Acumula o caractere
+                }
             }
-            valores.push(valorAtual.trim()); // Adiciona o último valor
+            valores.push(valorAtual.trim());
             const linhaObj = {};
             cabecalhos.forEach((cabecalho, index) => {
                 let valorFinal = valores[index] !== undefined ? valores[index] : '';
-                // Remove aspas das bordas apenas se o valor inteiro estava entre aspas (já tratado pelo loop)
-                // A lógica de remover aspas duplas escapadas já foi feita.
                 linhaObj[cabecalho] = valorFinal;
             });
             return linhaObj;
         });
-        // console.log(`Vendas.ts (processarCSVVendas): CSV Processado. Cabeçalhos: [${cabecalhos.join(', ')}]. Linhas: ${linhasProcessadas.length}`);
         return { cabecalhos, linhas: linhasProcessadas };
     }
     function formatarMoedaVendas(valor) {
         let numValor = typeof valor === 'string' ? parseFloat(valor.replace("R$", "").replace(/\./g, '').replace(',', '.').trim()) : Number(valor);
         if (isNaN(numValor))
-            return 'R$ 0,00'; // Retorna R$ 0,00 se não for um número válido
+            return 'R$ 0,00';
         return numValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
     function calcularKPIsEVisualizacoesVendas(dados) {
         console.log("DEBUG VENDAS (TS calcularKPIs): INICIADO com dados.length:", dados.length);
-        // Reseta KPIs
         if (kpiTotalVendasEl)
             kpiTotalVendasEl.textContent = formatarMoedaVendas(0);
         if (kpiNumTransacoesEl)
             kpiNumTransacoesEl.textContent = '0';
         if (kpiTicketMedioEl)
             kpiTicketMedioEl.textContent = formatarMoedaVendas(0);
-        // Destruir instância de gráfico de tendência antigo
         if (graficoTendenciaInstanceVendas) {
             graficoTendenciaInstanceVendas.destroy();
             graficoTendenciaInstanceVendas = null;
@@ -361,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (colS4Real)
                 unidadesSemana4 += parseInt(String(item[colS4Real] || '0')) || 0;
         });
-        const numTransacoes = dados.length; // Cada linha é uma transação/item agregado
+        const numTransacoes = dados.length;
         const ticketMedio = numTransacoes > 0 && totalVendasNumericoGlobal > 0 ? totalVendasNumericoGlobal / numTransacoes : 0;
         if (kpiTotalVendasEl)
             kpiTotalVendasEl.textContent = formatarMoedaVendas(totalVendasNumericoGlobal);
@@ -369,48 +351,81 @@ document.addEventListener('DOMContentLoaded', () => {
             kpiNumTransacoesEl.textContent = numTransacoes.toString();
         if (kpiTicketMedioEl)
             kpiTicketMedioEl.textContent = formatarMoedaVendas(ticketMedio);
-        // --- GRÁFICO DE TENDÊNCIA DE VENDAS SEMANAIS (UNIDADES) ---
         if (colS1Real && colS2Real && colS3Real && colS4Real && ctxTendenciaCanvas && typeof Chart !== 'undefined') {
             const labelsSemanas = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
-            const dadosSemanas = [unidadesSemana1, unidadesSemana2, unidadesSemana3, unidadesSemana4];
+            const dadosSemanasReais = [unidadesSemana1, unidadesSemana2, unidadesSemana3, unidadesSemana4];
+            const dadosSemanasExemploLojaComum = [
+                Math.max(0, Math.floor(unidadesSemana1 * 0.6)),
+                Math.max(0, Math.floor(unidadesSemana2 * 0.5)),
+                Math.max(0, Math.floor(unidadesSemana3 * 0.7)),
+                Math.max(0, Math.floor(unidadesSemana4 * 0.4))
+            ];
             if (graficoTendenciaInstanceVendas)
-                graficoTendenciaInstanceVendas.destroy(); // Garante que a instância anterior seja destruída
+                graficoTendenciaInstanceVendas.destroy();
             graficoTendenciaInstanceVendas = new Chart(ctxTendenciaCanvas.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: labelsSemanas,
-                    datasets: [{
-                            label: 'Unidades Vendidas por Semana', data: dadosSemanas,
-                            borderColor: corLinhaTendencia, backgroundColor: corAreaTendencia, tension: 0.3, fill: true,
-                            pointBackgroundColor: corLinhaTendencia, pointBorderColor: corTextoPrincipalDark, // Cor do ponto e borda
-                        }]
+                    datasets: [
+                        {
+                            label: 'Produtos Vendidos', // <<< LABEL AJUSTADO AQUI >>>
+                            data: dadosSemanasReais,
+                            borderColor: corLinhaTendencia,
+                            backgroundColor: corAreaTendencia,
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: corLinhaTendencia,
+                            pointBorderColor: corTextoPrincipalDark,
+                            order: 1
+                        },
+                        {
+                            label: 'Loja Comum',
+                            data: dadosSemanasExemploLojaComum,
+                            borderColor: corLinhaExemplo,
+                            backgroundColor: `${corLinhaExemplo}1A`,
+                            tension: 0.3,
+                            fill: false,
+                            borderDash: [5, 5],
+                            pointRadius: 3,
+                            pointBackgroundColor: corLinhaExemplo,
+                            order: 2
+                        }
+                    ]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            bottom: 20
+                        }
+                    },
                     scales: {
-                        y: { beginAtZero: true, ticks: { color: corTextoSecundarioDark, callback: (v) => Number.isInteger(v) ? v : null /* Mostra apenas inteiros */ } },
+                        y: { beginAtZero: true, ticks: { color: corTextoSecundarioDark, callback: (v) => Number.isInteger(v) ? v : null } },
                         x: { ticks: { color: corTextoSecundarioDark }, grid: { display: false } }
                     },
                     plugins: {
-                        legend: { display: true, position: 'bottom', labels: { color: corTextoSecundarioDark } },
-                        tooltip: { callbacks: { label: (c) => `${c.dataset.label || 'Unidades'}: ${c.raw}` } }
-                        // Datalabels (se registrado e desejado)
-                        // datalabels: {
-                        //     anchor: 'end',
-                        //     align: 'top',
-                        //     color: corTextoSecundarioDark,
-                        //     formatter: (value: number) => value > 0 ? value.toString() : null,
-                        // }
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: corTextoSecundarioDark,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (c) => `${c.dataset.label || 'Unidades'}: ${c.raw}`
+                            }
+                        }
                     }
                 }
             });
-            // console.log("DEBUG VENDAS (TS): Gráfico de tendência SEMANAL (unidades) renderizado.");
         }
         else {
             console.warn("VENDAS.TS: Não foi possível renderizar o gráfico de tendência semanal. Verifique se as colunas semanais existem no CSV e se o canvas 'grafico-tendencia-vendas' está no HTML.");
             createMessageForCanvas(ctxTendenciaCanvas, 'Dados semanais de unidades não encontrados no CSV.');
         }
-        // Log informativo sobre a remoção da lógica do gráfico de categoria
         console.log("INFO VENDAS (TS): Lógica do gráfico de Vendas por Categoria foi removida, pois o elemento HTML correspondente não foi encontrado.");
     }
     function renderizarTabelaVendas(dadosParaRenderizar) {
@@ -423,13 +438,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         cabecalhoTabelaVendasEl.innerHTML = '';
-        corpoTabelaVendas.innerHTML = ''; // Limpa tabela
+        corpoTabelaVendas.innerHTML = '';
         if (colunasDefinidasCSVVendas.length > 0) {
             colunasDefinidasCSVVendas.forEach(textoCabecalho => {
                 const th = document.createElement('th');
                 th.textContent = textoCabecalho;
                 const thLower = textoCabecalho.toLowerCase();
-                // Adiciona classe para alinhamento numérico
                 if (thLower.includes('valor') || thLower.includes('preço') || thLower.includes('total') ||
                     thLower.includes('semana') || thLower.includes('unidades') ||
                     thLower.includes('qtd') || thLower.includes('quantidade') || thLower.includes('número') || thLower.includes('id')) {
@@ -438,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cabecalhoTabelaVendasEl.appendChild(th);
             });
         }
-        else if (dadosParaRenderizar.length > 0) { // Fallback se colunasDefinidasCSVVendas estiver vazio mas houver dados
+        else if (dadosParaRenderizar.length > 0) {
             Object.keys(dadosParaRenderizar[0]).forEach(key => {
                 const th = document.createElement('th');
                 th.textContent = key;
@@ -446,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         if (dadosParaRenderizar.length === 0) {
-            const numColunas = Math.max(colunasDefinidasCSVVendas.length, 1); // Evita colspan="0"
+            const numColunas = Math.max(colunasDefinidasCSVVendas.length, 1);
             const mensagem = (filtroGeralInputVendas === null || filtroGeralInputVendas === void 0 ? void 0 : filtroGeralInputVendas.value.trim()) !== ''
                 ? 'Nenhuma venda encontrada para o filtro aplicado.'
                 : 'Nenhum dado de vendas para exibir.';
@@ -460,14 +474,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 let valor = String(linhaObj[cabecalho] !== undefined ? linhaObj[cabecalho] : '');
                 const cabecalhoLower = cabecalho.toLowerCase();
                 const nomeColunaValorRealCSV = colunasDefinidasCSVVendas.find(c => c.toLowerCase() === NOME_COLUNA_VALOR_VENDA.toLowerCase());
-                // Formata como moeda ou alinha como número
                 if ((nomeColunaValorRealCSV && cabecalho.toLowerCase() === nomeColunaValorRealCSV.toLowerCase()) ||
                     cabecalhoLower.includes('preço') || cabecalhoLower.includes('valor total')) {
                     td.textContent = formatarMoedaVendas(valor);
                     td.classList.add('coluna-numero');
                 }
                 else if (cabecalhoLower.includes('semana') || cabecalhoLower.includes('unidades') ||
-                    cabecalhoLower.includes('qtd') || cabecalhoLower.includes('id')) { // Adicionar mais termos numéricos se necessário
+                    cabecalhoLower.includes('qtd') || cabecalhoLower.includes('id')) {
                     td.textContent = valor;
                     td.classList.add('coluna-numero');
                 }
@@ -479,9 +492,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function filtrarLinhaVendas(linha, termoBusca) {
         if (!termoBusca)
-            return true; // Se não há termo de busca, todas as linhas passam
+            return true;
         const termoLower = termoBusca.toLowerCase();
-        // Busca em todas as colunas definidas (ou todas as chaves do objeto se colunas não definidas)
         const colunasParaBusca = colunasDefinidasCSVVendas.length > 0 ? colunasDefinidasCSVVendas : Object.keys(linha);
         return colunasParaBusca.some(cabecalho => String(linha[cabecalho]).toLowerCase().includes(termoLower));
     }
@@ -493,37 +505,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorMessageDivVendas.style.display = 'none';
             if (noDataMessageDivVendas)
                 noDataMessageDivVendas.style.display = 'none';
-            // Limpa cabeçalho e corpo da tabela enquanto carrega
             if (cabecalhoTabelaVendasEl)
                 cabecalhoTabelaVendasEl.innerHTML = '';
             if (corpoTabelaVendas) {
-                const numCols = Math.max(colunasDefinidasCSVVendas.length, 1); // Pega o número de colunas já definidas ou 1
+                const numCols = Math.max(colunasDefinidasCSVVendas.length, 1);
                 corpoTabelaVendas.innerHTML = `<tr><td colspan="${numCols}" style="text-align:center; padding:20px; color:${corTextoSecundarioDark};">Carregando dados...</td></tr>`;
             }
-            if (!URL_PLANILHA_CSV_VENDAS || URL_PLANILHA_CSV_VENDAS.length < 50) { // Validação básica da URL
+            if (!URL_PLANILHA_CSV_VENDAS || URL_PLANILHA_CSV_VENDAS.length < 50) {
                 mostrarGlobalMessageVendas(errorMessageDivVendas, 'Erro: URL da planilha CSV inválida ou não configurada.');
-                renderizarTabelaVendas([]); // Limpa tabela com mensagem de "sem dados"
-                calcularKPIsEVisualizacoesVendas([]); // Limpa KPIs e gráficos
+                renderizarTabelaVendas([]);
+                calcularKPIsEVisualizacoesVendas([]);
                 return;
             }
             try {
-                const resposta = yield fetch(URL_PLANILHA_CSV_VENDAS, { cache: 'no-store' }); // no-store para sempre pegar a mais recente
+                const resposta = yield fetch(URL_PLANILHA_CSV_VENDAS, { cache: 'no-store' });
                 if (!resposta.ok)
                     throw new Error(`Falha ao buscar CSV da planilha (${resposta.status} ${resposta.statusText}).`);
                 const textoCsv = yield resposta.text();
                 if (!textoCsv || textoCsv.trim() === '')
                     throw new Error('Arquivo CSV da planilha está vazio ou inválido.');
-                const { linhas } = processarCSVVendas(textoCsv); // colunasDefinidasCSVVendas é setada dentro de processarCSVVendas
+                const { linhas } = processarCSVVendas(textoCsv);
                 dadosCompletosVendas = linhas;
-                // console.log(`DEBUG VENDAS (TS carregarDadosVendas): CSV Processado. ${linhas.length} linhas.`);
                 if (loadingMessageDivVendas)
-                    loadingMessageDivVendas.style.display = 'none'; // Esconde mensagem de carregando
+                    loadingMessageDivVendas.style.display = 'none';
                 if (typeof handlePageLoadAndNavigationVendas === "function") {
-                    handlePageLoadAndNavigationVendas(); // Chama para exibir a seção correta e seus dados
+                    handlePageLoadAndNavigationVendas();
                 }
-                else { // Fallback caso a função de navegação não esteja pronta/definida
+                else {
                     console.error("ERRO FATAL: handlePageLoadAndNavigationVendas não está definida ao final de carregarDadosVendas!");
-                    // Tenta renderizar o dashboard principal como fallback
                     const dashboardSectionEl = document.getElementById('secao-dashboard');
                     if (dashboardSectionEl) {
                         dashboardSectionEl.style.display = 'block';
@@ -548,16 +557,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loadingMessageDivVendas)
                     loadingMessageDivVendas.style.display = 'none';
                 mostrarGlobalMessageVendas(errorMessageDivVendas, `Erro ao carregar dados: ${(erro instanceof Error ? erro.message : 'Erro desconhecido.')}`);
-                renderizarTabelaVendas([]); // Limpa tabela
-                calcularKPIsEVisualizacoesVendas([]); // Limpa KPIs e gráficos
+                renderizarTabelaVendas([]);
+                calcularKPIsEVisualizacoesVendas([]);
             }
         });
     }
     if (filtroGeralInputVendas) {
         filtroGeralInputVendas.addEventListener('input', () => {
-            const termoBusca = filtroGeralInputVendas.value.trim().toLowerCase(); // Já converte para lowerCase aqui
+            const termoBusca = filtroGeralInputVendas.value.trim().toLowerCase();
             const dashboardSection = document.getElementById('secao-dashboard');
-            // Só filtra e renderiza se a seção do dashboard estiver ativa
             if ((dashboardSection === null || dashboardSection === void 0 ? void 0 : dashboardSection.style.display) === 'block' || (dashboardSection === null || dashboardSection === void 0 ? void 0 : dashboardSection.classList.contains('active-section'))) {
                 const dadosFiltrados = dadosCompletosVendas.filter(linha => filtrarLinhaVendas(linha, termoBusca));
                 renderizarTabelaVendas(dadosFiltrados);
@@ -565,6 +573,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     carregarDadosVendas();
-    // console.log("DEBUG VENDAS (TS): Event listeners e carregamento inicial configurados.");
 });
 //# sourceMappingURL=vendas.js.map
