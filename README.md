@@ -22,7 +22,7 @@ Esse projeto foi desenvolvido com **TypeScript, HTML e CSS**, que permite visual
 | Ferramenta | Descrição |
 |------------|-----------|
 | 🧩 TypeScript | Tipagem estática moderna para JavaScript |
-| 🎨 HTML + CSS | Estrutura e estilo visual da aplicação |
+| 🎨 HTML + CSS | Estrutura e estilo visual do website |
 | 🌐 GitHub REST API | Fonte dos dados exibidos |
 
 ---
